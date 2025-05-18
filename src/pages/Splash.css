@@ -27,39 +27,6 @@
   }
   
   .btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .btn.primary {
-    background-color: #d4af7f;
-    color: white;
-  }
-  
-  .btn.primary:hover {
-    background-color: #c49b68;
-  }
-  
-  .btn.secondary {
-    background-color: white;
-    color: #ac7e51;
-    border: 2px solid #a67c52;
-  }
-  
-  .btn.secondary:hover {
-    background-color: #f6f1e4;
-  }
-  .logo {
-    width: 100px;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-  }
-  .btn {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   border: none;
@@ -70,7 +37,7 @@
 }
 
 .btn.primary {
-  background-color: #007bff; /* כאן הצבע של הכפתור "למד עוד" */
+  background-color: #a67c52; /* כאן הצבע של הכפתור "למד עוד" */
   color: white;
 }
 
@@ -81,16 +48,62 @@
 
 .login-form {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* הכי חשוב - טור! */
+  align-items: center;     /* ממרכז את הכל */
   max-width: 300px;
-  margin: 0 auto;
-  margin-top: 2rem;
+  margin: 2rem auto;
 }
 
+
+
 .login-form input {
+  width: 100%;
   margin-bottom: 1rem;
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 2px solid #8B4513;
   border-radius: 5px;
   font-size: 1rem;
+ background-color: white !important;     /* 🟢 רקע לבן! */
+  color: #8B4513 !important;
+  box-sizing: border-box;
+  -webkit-appearance: none;    /* 🔧 מסיר עיצוב דיפולטי של כרום */
+  appearance: none;
+  background-image: none;
+   -webkit-appearance: none;
+  appearance: none;
+}
+
+
+.login-form button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background-color: #8B4513;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #A0522D;
+}
+
+.error-message {
+  color: red;
+  margin-top: 0.5rem;
+}
+.login-form input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #8B4513 !important;  /* ✅ הטקסט עצמו */
+  color: #8B4513 !important;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+.login-form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #8B4513 !important;
+  color: #8B4513 !important;
 }
