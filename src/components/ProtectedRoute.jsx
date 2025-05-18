@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function ProtectedRoute({ children, requiredRole }) {
   const { currentUser, role, loading } = useAuth();
 
-  // הוספה חשובה: חכה עד שהטעינה תסתיים
+
   if (loading || (requiredRole && role === null)) {
     return <div>טוען הרשאות...</div>;
   }
