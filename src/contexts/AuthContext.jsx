@@ -9,23 +9,39 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
-
+    
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        }
-      } else {
+  
+      if (!user) {
         setRole(null);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+  
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid)); // ← קודם כל זה!
+  
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          console.log('📥 role נטען מ-Firestore:', data.role); // ← עכשיו זה בטוח
+          setRole(data.role || null);
+        } else {
+          console.warn('⚠️ אין מסמך ב-users עבור המשתמש');
+          setRole(null);
+        }
+      } catch (err) {
+        console.error('⚠️ שגיאה בקריאת role:', err);
+        setRole(null);
+      } finally {
+        setLoading(false);
+      }
     });
-
+  
     return () => unsubscribe();
   }, []);
+  
 
   return (
     <AuthContext.Provider value={{ currentUser, role, loading }}>

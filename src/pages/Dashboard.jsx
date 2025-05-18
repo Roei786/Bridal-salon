@@ -1,8 +1,10 @@
+import { useAuth } from '../contexts/AuthContext';
+import UserCreationForm from '../components/UserCreationForm';
 export default function Dashboard() {
-    return (
-      <div>
-        <h1>דאשבורד</h1>
-      </div>
-    );
-  }
-  
+  return (
+    <div>
+      <h2>דאשבורד מנהלת</h2>
+      <UserCreationForm />
+    </div>
+  );
+}

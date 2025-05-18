@@ -9,6 +9,8 @@ import Splash from './pages/Splash';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import Unauthorized from './pages/Unauthorized';
 
 function App() {
   return (
@@ -17,9 +19,13 @@ function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/about" element={<div>עמוד אודות בקרוב...</div>} />
-
+        <Route path="/dashboard" element={
+    <ProtectedRoute requiredRole="manager">
+      <Dashboard />
+    </ProtectedRoute>
+  }
+/>
+<Route path="/unauthorized" element={<Unauthorized />} />   
       </Routes>
     </Router>
   );

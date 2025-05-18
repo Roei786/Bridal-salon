@@ -11,23 +11,26 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      if (err.code === 'auth/user-not-found') {
-        setError('לא נמצא משתמש עם האימייל הזה');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('הסיסמה שגויה');
-      } else {
-        setError('אירעה שגיאה בעת ההתחברות');
-      }
-      console.error(err);
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    
+    navigate('/dashboard');
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === 'auth/wrong-password') {
+      setError('סיסמה שגויה');
+    } else if (err.code === 'auth/user-not-found') {
+      setError('משתמש לא קיים');
+    } else {
+      setError('שגיאה כללית בהתחברות');
     }
-  };
+  }
+};
+
 
   return (
     <div className="login-container">
