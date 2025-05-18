@@ -1,0 +1,60 @@
+.splash-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(#fffbe9, #fff5d1);
+    text-align: center;
+  }
+  
+  .splash-header .title {
+    font-size: 2.5rem;
+    color: #a67c52;
+  }
+  
+  .splash-header .subtitle {
+    font-size: 1.2rem;
+    color: #6d4c41;
+    margin-top: 0.5rem;
+  }
+  
+  .splash-buttons {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .btn.primary {
+    background-color: #d4af7f;
+    color: white;
+  }
+  
+  .btn.primary:hover {
+    background-color: #c49b68;
+  }
+  
+  .btn.secondary {
+    background-color: white;
+    color: #a67c52;
+    border: 2px solid #a67c52;
+  }
+  
+  .btn.secondary:hover {
+    background-color: #f6f1e4;
+  }
+  .logo {
+    width: 100px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
