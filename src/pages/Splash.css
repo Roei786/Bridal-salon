@@ -1,32 +1,32 @@
 .splash-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vh;
-    background: linear-gradient(#fffbe9, #fff5d1);
-    text-align: center;
-  }
-  
-  .splash-header .title {
-    font-size: 2.5rem;
-    color: #a67c52;
-  }
-  
-  .splash-header .subtitle {
-    font-size: 1.2rem;
-    color: #6d4c41;
-    margin-top: 0.5rem;
-  }
-  
-  .splash-buttons {
-    margin-top: 2rem;
-    display: flex;
-    gap: 1rem;
-  }
-  
-  .btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100wh;
+  background: linear-gradient(#fffbe9, #fff5d1);
+  text-align: center;
+}
+
+.splash-header .title {
+  font-size: 2.5rem;
+  color: #a67c52;
+}
+
+.splash-header .subtitle {
+  font-size: 1.2rem;
+  color: #6d4c41;
+  margin-top: 0.5rem;
+}
+
+.splash-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   border: none;
@@ -37,7 +37,8 @@
 }
 
 .btn.primary {
-  background-color: #a67c52; /* כאן הצבע של הכפתור "למד עוד" */
+  background-color: #a67c52;
+  /* כאן הצבע של הכפתור "למד עוד" */
   color: white;
 }
 
@@ -48,8 +49,10 @@
 
 .login-form {
   display: flex;
-  flex-direction: column; /* הכי חשוב - טור! */
-  align-items: center;     /* ממרכז את הכל */
+  flex-direction: column;
+  /* הכי חשוב - טור! */
+  align-items: center;
+  /* ממרכז את הכל */
   max-width: 300px;
   margin: 2rem auto;
 }
@@ -63,13 +66,15 @@
   border: 2px solid #8B4513;
   border-radius: 5px;
   font-size: 1rem;
- background-color: white !important;     /* 🟢 רקע לבן! */
+  background-color: white !important;
+  /* 🟢 רקע לבן! */
   color: #8B4513 !important;
   box-sizing: border-box;
-  -webkit-appearance: none;    /* 🔧 מסיר עיצוב דיפולטי של כרום */
+  -webkit-appearance: none;
+  /* 🔧 מסיר עיצוב דיפולטי של כרום */
   appearance: none;
   background-image: none;
-   -webkit-appearance: none;
+  -webkit-appearance: none;
   appearance: none;
 }
 
@@ -93,10 +98,12 @@
   color: red;
   margin-top: 0.5rem;
 }
+
 .login-form input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
   box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #8B4513 !important;  /* ✅ הטקסט עצמו */
+  -webkit-text-fill-color: #8B4513 !important;
+  /* ✅ הטקסט עצמו */
   color: #8B4513 !important;
   transition: background-color 9999s ease-out, color 9999s ease-out;
 }
