@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
-import ManagerDashboard from './ManagerDashboard';
-import EmployeeDashboard from './EmployeeDashboard';
+import ManagerDashboard from '../components/ManagerDashboard';
+import EmployeeDashboard from '../components/EmployeeDashboard';
 import './Dashboard.css';
 
 export default function Dashboard() {
