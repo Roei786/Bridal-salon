@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './pages/Unauthorized';
 import UserList from './components/UserList';
 import UserCreationForm from './components/UserCreationForm';
+import BrideCards from './components/BrideCards';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/login" element={<Login />} />
          <Route path="/dashboard"element={ <ProtectedRoute>  <Dashboard /> </ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
+        <Route path="/brides" element={<ProtectedRoute><BrideCards /></ProtectedRoute>} />
         <Route path="/users/new" element={<ProtectedRoute><UserCreationForm /></ProtectedRoute>} />
          <Route path="/register" element={<Register />} />
 <Route path="/unauthorized" element={<Unauthorized />} />   
