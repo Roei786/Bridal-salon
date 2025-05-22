@@ -7,7 +7,7 @@ export default function ManagerDashboard() {
   const navigate = useNavigate();
 
   const buttons = [
-    { label: 'ניהול משתמשים', icon: '👤', path: '/src/components/UserList.jsx' },
+    { label: 'ניהול משתמשים', icon: '👤', path: '/users' },
     { label: 'כרטיסיות כלות', icon: '👰', path: '/brides' },
     { label: 'טופס התארגנות', icon: '📝', path: '/preparation-form' },
     { label: 'יומן פגישות', icon: '📅', path: '/calendar' },
