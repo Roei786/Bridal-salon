@@ -54,7 +54,7 @@ const UserList = () => {
 
       {/* Button to navigate to the user creation form */}
       <button
-        onClick={() => navigate('src/components/UserCreationForm.jsx')}
+        onClick={() => navigate('/users/new')}
         style={{ marginTop: '20px', padding: '10px 15px' }}
       >
         Add User
