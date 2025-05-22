@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './pages/Unauthorized';
+import UserList from './components/UserList';
+import UserCreationForm from './components/UserCreationForm';
 
 function App() {
   return (
@@ -18,15 +20,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  }
-/>
+         <Route path="/dashboard"element={ <ProtectedRoute>  <Dashboard /> </ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
+        <Route path="/users/new" element={<ProtectedRoute><UserCreationForm /></ProtectedRoute>} />
+         <Route path="/register" element={<Register />} />
 <Route path="/unauthorized" element={<Unauthorized />} />   
       </Routes>
     </Router>
