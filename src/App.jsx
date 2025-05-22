@@ -19,8 +19,10 @@ function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={
-    <ProtectedRoute requiredRole="manager">
+        <Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute>
       <Dashboard />
     </ProtectedRoute>
   }
