@@ -4,57 +4,90 @@ import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { nanoid } from 'nanoid'; 
 import { useSearchParams } from 'react-router-dom';
+import { firebaseConfig } from '../firebase'
+import { initializeApp } from 'firebase/app';
+import { getAuth,  deleteUser } from 'firebase/auth';
+import { deleteApp } from 'firebase/app';
+import emailjs from 'emailjs-com';
+
+
 
 export default function UserCreationForm() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [role, setRole] = useState('employee');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
   const [searchParams] = useSearchParams();
   const inviteId = searchParams.get('invite');
-  const handleCreateInvite = async (e) => {
-    const inviteId = nanoid(12); // לדוגמה: '4X9qaBfjkZt2'
-
-  await setDoc(doc(db, 'invitations', inviteId), {
-    role: 'employee',
-    used: false,
-    createdAt: new Date()
-  });
-
-  const link = `${window.location.origin}/register?invite=${inviteId}`;
-  console.log('העתק את הקישור:', link);
   
-    const inviteLink = `https://your-site.com/register?invite=${inviteId}`;
+  const sendEmailWithPassword = async ( email, tempPassword) => {
+  try {
+    console.log('🔍 מייל נשלח ל:', email);
 
-  };
+    await emailjs.send(
+  'service_3svuzga',         
+  'template_m2xwgis',      
+  {
+      to_email: email,              
+    TEMP_PASSWORD: tempPassword,
+      
+  },
+  '4b9wNL-th6VR4bpFE'      
+);
+    console.log('📧 מייל נשלח בהצלחה');
+  } catch (err) {
+    console.error('שגיאה בשליחת מייל:', err);
+  }
+};
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setMessage('');
     setError('');
+    setTempPassword('');
+
+    const tempPassword = nanoid(10);
+
+try {
+  const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
+
+  const secondaryAuth = getAuth(secondaryApp);
+  const userCredential = await createUserWithEmailAndPassword(
+    secondaryAuth,
+    email,
+    tempPassword
+  );
+
+  const user = userCredential.user;
+
+  await setDoc(doc(db, 'users', user.uid), {
+    fullName,
+    email,
+    role,
+    mustChangePassword: true,
+    createdAt: new Date()
+  });
+
+   
   
-    try {
-      // נניח שהמייל לא קיים עדיין ב־Auth
-      const fakeId = email.replace(/[^a-zA-Z0-9]/g, '_'); // ID זמני
-  
-      await setDoc(doc(db, 'invitations', fakeId), {
-        fullName,
-        email,
-        role,
-        invited: true,
-        createdAt: new Date()
-      });
-  
-      setMessage(`המשתמש "${fullName}" הוזמן בהצלחה!`);
-      setFullName('');
-      setEmail('');
-      setRole('employee');
-    } catch (err) {
-      console.error(err);
-      setError('שגיאה ביצירת ההזמנה: ' + err.message);
-    }
-  };
+  await deleteApp(secondaryApp);
+
+
+  setMessage(`המשתמש נוצר עם סיסמה זמנית: ${tempPassword}`);
+  setTempPassword(tempPassword);
+  setFullName('');
+  setEmail('');
+  setRole('employee');
+  await sendEmailWithPassword( email, tempPassword);
+
+  } catch (err) {
+    console.error(err);
+    setError('שגיאה ביצירת המשתמש: ' + err.message);
+  }
+};
+
   
 
   return (
@@ -75,18 +108,18 @@ export default function UserCreationForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          type="password"
-          placeholder="סיסמה"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        
-        <button type="submit" onClick={handleCreateInvite}>צור משתמש</button>
+        <button type="submit">צור משתמש</button>
       </form>
 
       {message && <p style={{ color: 'green' }}>{message}</p>}
+      {tempPassword && (
+        <div style={{ marginTop: '1rem' }}>
+          <p><strong>סיסמה זמנית:</strong> <code>{tempPassword}</code></p>
+          <p style={{ fontSize: '0.9rem', color: '#555' }}>
+            מסור לעובד את הסיסמה – הוא יתבקש לשנות אותה בהתחברות הראשונה.
+          </p>
+        </div>
+      )}
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
