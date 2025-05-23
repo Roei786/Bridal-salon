@@ -1,65 +1,96 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; // Import Firebase connection
-import { useNavigate } from 'react-router-dom'; // For navigating to another page
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Typography,
+  Box
+} from '@mui/material';
+import './UserList.css';
 
 const UserList = () => {
-  const [users, setUsers] = useState([]); // State to store users from Firestore
-  const navigate = useNavigate(); // Hook to navigate between pages
+  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch users from Firestore when the component loads
     const fetchUsers = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'users')); // Read from 'users' collection
+        const querySnapshot = await getDocs(collection(db, 'users'));
         const usersData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        setUsers(usersData); // Save the users in state
+        setUsers(usersData);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
 
-    fetchUsers(); // Run the fetch once on component mount
+    fetchUsers();
   }, []);
 
+  const handleDelete = async (userId) => {
+    const confirmed = window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש?');
+    if (!confirmed) return;
+
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+      setUsers(prev => prev.filter(user => user.id !== userId));
+    } catch (error) {
+      console.error('שגיאה במחיקת המשתמש:', error);
+    }
+  };
+
   return (
-    <div>
-      <h2>User List</h2>
+    <Box sx={{ padding: 4 }}>
+      <Typography variant="h4" gutterBottom>רשימת משתמשים</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="right">שם מלא</TableCell>
+              <TableCell align="right">אימייל</TableCell>
+              <TableCell align="right">תפקיד</TableCell>
+              <TableCell align="right">מחיקה</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users.map(user => (
+              <TableRow key={user.id}>
+                <TableCell align="right">{user.fullName}</TableCell>
+                <TableCell align="right">{user.email}</TableCell>
+                <TableCell align="right" style={{ color: user.role === 'manager' ? 'green' : 'crimson' }}>
+                  {user.role}
+                </TableCell>
+                <TableCell align="right">
+                  <Button variant="outlined" color="error" onClick={() => handleDelete(user.id)}>
+                    🗑️ מחק
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Table showing the list of users */}
-      <table border="1" cellPadding="8" cellSpacing="0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Role</th>
-          </tr>
-        </thead>
-        <tbody>
-          {/* Loop through users and render each row */}
-          {users.map(user => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.fullName}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Button to navigate to the user creation form */}
-      <button
-        onClick={() => navigate('/users/new')}
-        style={{ marginTop: '20px', padding: '10px 15px' }}
-      >
-        Add User
-      </button>
-    </div>
+      <Box mt={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/users/new')}
+        >
+          הוסף משתמש
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
