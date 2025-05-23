@@ -31,11 +31,11 @@ export default function Splash() {
 
   return (
     <div className="splash-container">
-      <img src="/logo.jpg" alt="logo" className="logo" />
+    <img src="/logo.jpg" alt="logo" className="logo" style={{ width: '150px', height: 'auto' }} />
 
       <div className="splash-header">
-        <h1 className="title">ברוכה הבאה לעמותת כלה</h1>
-        <p className="subtitle">שמלה. איפור. ליווי. באהבה.</p>
+        <h1 className="title">הודיה - סלון כלות חברתי</h1>
+        <p className="subtitle"></p>
       </div>
 
       <form className="login-form" onSubmit={handleLogin}>
