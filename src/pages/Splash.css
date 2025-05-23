@@ -11,12 +11,12 @@
 
 .splash-header .title {
   font-size: 2.5rem;
-  color: #a67c52;
+  color: #BC8C61;
 }
 
 .splash-header .subtitle {
   font-size: 1.2rem;
-  color: #6d4c41;
+  color: #BC8C61;
   margin-top: 0.5rem;
 }
 
@@ -37,8 +37,7 @@
 }
 
 .btn.primary {
-  background-color: #a67c52;
-  /* כאן הצבע של הכפתור "למד עוד" */
+  background-color: #BC8C61;
   color: white;
 }
 
@@ -50,9 +49,7 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  /* הכי חשוב - טור! */
   align-items: center;
-  /* ממרכז את הכל */
   max-width: 300px;
   margin: 2rem auto;
 }
@@ -63,15 +60,13 @@
   width: 100%;
   margin-bottom: 1rem;
   padding: 0.75rem;
-  border: 2px solid #8B4513;
+  border: 2px solid #BC8C61;
   border-radius: 5px;
   font-size: 1rem;
   background-color: white !important;
-  /* 🟢 רקע לבן! */
-  color: #8B4513 !important;
+  color: #BC8C61 !important;
   box-sizing: border-box;
   -webkit-appearance: none;
-  /* 🔧 מסיר עיצוב דיפולטי של כרום */
   appearance: none;
   background-image: none;
   -webkit-appearance: none;
@@ -83,7 +78,7 @@
   width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
-  background-color: #8B4513;
+  background-color: #BC8C61;
   color: white;
   border: none;
   border-radius: 5px;
@@ -91,7 +86,7 @@
 }
 
 .login-form button:hover {
-  background-color: #A0522D;
+  background-color: #BC8C61;
 }
 
 .error-message {
@@ -102,15 +97,14 @@
 .login-form input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
   box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #8B4513 !important;
-  /* ✅ הטקסט עצמו */
-  color: #8B4513 !important;
+  -webkit-text-fill-color: #BC8C61 !important;
+  color: #BC8C61 !important;
   transition: background-color 9999s ease-out, color 9999s ease-out;
 }
 
 .login-form input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
   box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #8B4513 !important;
-  color: #8B4513 !important;
+  -webkit-text-fill-color: #BC8C61 !important;
+  color: #BC8C61 !important;
 }
