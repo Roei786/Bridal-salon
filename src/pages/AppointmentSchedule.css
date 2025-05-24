@@ -1,0 +1,73 @@
+/* Layout container */
+.appointment-schedule {
+  padding: 2rem;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(#fffbe9, #fff5d1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header title */
+.schedule-title {
+  font-size: 2rem;
+  color: #BC8C61;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Form container */
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+/* Appointments list */
+.appointment-list {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Individual appointment card (Card component) */
+.appointment-card {
+  background-color: white;
+  border-left: 5px solid #BC8C61;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Appointment card text */
+.appointment-card h4 {
+  color: #BC8C61;
+  margin: 0 0 0.5rem 0;
+}
+
+.appointment-card p {
+  margin: 0;
+  color: #6d4c41; /* Soft brown for secondary text */
+  font-size: 0.95rem;
+}
+
+.appointment-form button {
+  background-color: #BC8C61;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.appointment-form button:hover {
+  background-color: #a37455;
+}
