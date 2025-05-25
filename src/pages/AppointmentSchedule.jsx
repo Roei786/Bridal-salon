@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Container, Typography, TextField, MenuItem, Button,
-  Card, CardContent, Stack, Table, TableHead, TableRow, TableCell, TableBody, IconButton
+  Card, CardContent, Table, TableHead, TableRow, TableCell, TableBody, IconButton
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -13,6 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import "./AppointmentSchedule.css"; // ✅ Import the CSS
 
 const types = ["התאמה", "מדידה ראשונה", "פגישה כללית"];
 const statuses = ["מתוכנן", "הושלם", "בוטל"];
@@ -27,7 +28,6 @@ export default function AppointmentSchedule() {
     status: "מתוכנן",
   });
 
-  // Track which appointment is currently being edited, store the edited data here
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
 
@@ -40,7 +40,6 @@ export default function AppointmentSchedule() {
     fetchAppointments();
   }, []);
 
-  // Handle input change for new appointment form
   const handleChange = (field) => (event) => {
     setNewAppointment({ ...newAppointment, [field]: event.target.value });
   };
@@ -49,7 +48,6 @@ export default function AppointmentSchedule() {
     setNewAppointment({ ...newAppointment, time: newValue });
   };
 
-  // Add new appointment to Firestore & local state
   const handleAddAppointment = async () => {
     const { name, type, time, notes, status } = newAppointment;
 
@@ -78,7 +76,6 @@ export default function AppointmentSchedule() {
     }
   };
 
-  // Start editing an appointment
   const handleEditClick = (appt) => {
     setEditId(appt.id);
     setEditData({
@@ -90,7 +87,6 @@ export default function AppointmentSchedule() {
     });
   };
 
-  // Handle changes while editing
   const handleEditChange = (field) => (event) => {
     setEditData({ ...editData, [field]: event.target.value });
   };
@@ -99,7 +95,6 @@ export default function AppointmentSchedule() {
     setEditData({ ...editData, time: newValue });
   };
 
-  // Save edited appointment to Firestore & local state
   const handleSaveEdit = async () => {
     if (!editId) return;
 
@@ -114,7 +109,6 @@ export default function AppointmentSchedule() {
     try {
       const docRef = doc(db, "appointments", editId);
       await updateDoc(docRef, updatedData);
-
       setAppointments(appointments.map(appt => appt.id === editId ? { id: editId, ...updatedData } : appt));
       setEditId(null);
       setEditData({});
@@ -123,13 +117,11 @@ export default function AppointmentSchedule() {
     }
   };
 
-  // Cancel editing mode
   const handleCancelEdit = () => {
     setEditId(null);
     setEditData({});
   };
 
-  // Delete appointment from Firestore & local state
   const handleDelete = async (id) => {
     try {
       await deleteDoc(doc(db, "appointments", id));
@@ -141,13 +133,12 @@ export default function AppointmentSchedule() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="md" sx={{ py: 4, background: 'linear-gradient(#fffbe9, #fff5d1)', borderRadius: 2 }}>
-        <Typography variant="h4" color="#BC8C61" gutterBottom>
+      <Container maxWidth="md" className="appointment-schedule">
+        <Typography variant="h4" className="schedule-title" gutterBottom>
           יומן פגישות
         </Typography>
 
-        {/* Existing Appointments Table */}
-        <Card sx={{ mb: 4 }}>
+        <Card className="appointment-list" sx={{ mb: 4 }}>
           <CardContent>
             <Typography variant="h6" color="#BC8C61" gutterBottom>
               פגישות קיימות
@@ -247,10 +238,9 @@ export default function AppointmentSchedule() {
           </CardContent>
         </Card>
 
-        {/* Add New Appointment Form */}
         <Card>
           <CardContent>
-            <Stack spacing={2}>
+            <div className="appointment-form">
               <TextField
                 label="שם הלקוחה"
                 variant="outlined"
@@ -295,10 +285,10 @@ export default function AppointmentSchedule() {
                   <MenuItem key={idx} value={s}>{s}</MenuItem>
                 ))}
               </TextField>
-              <Button variant="contained" onClick={handleAddAppointment} sx={{ bgcolor: '#BC8C61' }}>
+              <Button variant="contained" onClick={handleAddAppointment}>
                 הוסף פגישה
               </Button>
-            </Stack>
+            </div>
           </CardContent>
         </Card>
       </Container>
