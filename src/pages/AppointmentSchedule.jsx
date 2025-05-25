@@ -13,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import "./AppointmentSchedule.css"; // ✅ Import the CSS
+import "./AppointmentSchedule.css"; 
 
 const types = ["התאמה", "מדידה ראשונה", "פגישה כללית"];
 const statuses = ["מתוכנן", "הושלם", "בוטל"];
