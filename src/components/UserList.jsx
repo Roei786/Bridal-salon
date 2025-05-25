@@ -92,25 +92,60 @@ const UserList = () => {
           רשימת משתמשים
         </Typography>
 
-        {/* 🔍 שדה חיפוש */}
         <Box display="flex" gap={2} mb={3}>
           <TextField
-            label="חפש לפי שם"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      label="חפש לפי שם"
+      variant="outlined"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      sx={{
+        backgroundColor: '#fffdf4',
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: '#c7a584',
+          },
+          '&:hover fieldset': {
+            borderColor: '#8b5e3c',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#8b5e3c',
+          },
+        },
+        input: {
+      color: '#6d4c41',
+    },
+  }}
+/>
+
         </Box>
 
         <TableContainer component={Paper}>
-          <Table>
+          <Table dir= "rtl">
             <TableHead>
-              <TableRow>
-                <TableCell align="right" onClick={() => handleSort('fullName')} style={{ cursor: 'pointer' }}>
+              <TableRow
+                sx={{
+                  backgroundColor: "#e0c097",
+                  borderRadius: '16px',
+                  '& td': {
+                    color: "#6d4c41",
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem'
+                  }
+                }}
+              >
+                <TableCell
+                  align="right"
+                  onClick={() => handleSort('fullName')}
+                  style={{ cursor: 'pointer' }}
+                >
                   שם מלא {renderSortIcon('fullName')}
                 </TableCell>
                 <TableCell align="right">אימייל</TableCell>
-                <TableCell align="right" onClick={() => handleSort('role')} style={{ cursor: 'pointer' }}>
+                <TableCell
+                  align="right"
+                  onClick={() => handleSort('role')}
+                  style={{ cursor: 'pointer' }}
+                >
                   תפקיד {renderSortIcon('role')}
                 </TableCell>
                 <TableCell align="right">מחיקה</TableCell>

@@ -17,3 +17,10 @@
   max-width: 800px;
   margin: 0 auto;
 }
+.search-input .MuiInputBase-root {
+  background-color: #fffdf4;
+  border-radius: 5px;
+}
+.search-input .MuiOutlinedInput-notchedOutline {
+  border-color: #c7a584;
+}
