@@ -21,13 +21,9 @@ export default function ManagerDashboard() {
   return (
     <div className="dashboard-container">
       
-      {/* אזור כפתורי הגדרות ויציאה */}
-      <div className="top-buttons">
-        <button onClick={() => navigate('/settings')} className="top-button">⚙️ אזור אישי</button>
-        <button onClick={() => navigate('/logout')} className="top-button">יציאה</button>
-      </div>
-
-      {/* כרטיס הדשבורד הראשי */}
+      
+      
+   
       <div className="dashboard-card dashboard-wrapper">
         <h2 className="dashboard-title dashboard-header">👋 שלום מנהלת</h2>
 
