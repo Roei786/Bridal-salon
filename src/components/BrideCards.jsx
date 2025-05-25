@@ -40,6 +40,7 @@ const BrideCards = () => {
   return (
     <div style={{
       minHeight: '100vh',
+      width: '100vw',
       background: 'linear-gradient(#fffbe9, #fff5d1)',
       padding: '2rem',
       fontFamily: 'Arial, sans-serif'
@@ -51,20 +52,8 @@ const BrideCards = () => {
         fontSize: '2rem'
       }}>רשימת כלות</h2>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-        <input
-          type="text"
-          placeholder="חפש לפי שם כלה"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            border: '2px solid #a67c52',
-            borderRadius: '8px',
-            minWidth: '200px'
-          }}
-        />
+      {/* שורת חיפוש */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => setSearchTerm(searchTerm.trim())}
           style={{
@@ -80,17 +69,38 @@ const BrideCards = () => {
         >
           חפש
         </button>
+        <input
+          type="text"
+          placeholder="חפש לפי שם כלה"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          dir="rtl"
+          style={{
+            backgroundColor: 'white',        
+            color: '#6d4c41',               
+            padding: '0.75rem',
+            fontSize: '1rem',
+            border: '2px solid #a67c52',
+            borderRadius: '8px',
+            minWidth: '200px'
+          }}
+        />
+      </div>
+
+      {/* סרגל סינונים */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
         <select
           value={filterPayment}
           onChange={(e) => setFilterPayment(e.target.value)}
           style={{
+            backgroundColor:'#6d4c41',  
             padding: '0.75rem',
             fontSize: '1rem',
             borderRadius: '8px',
             border: '2px solid #a67c52'
           }}
         >
-          <option value="">כל התשלומים</option>
+          <option value="">סטטוס תשלום</option>
           <option value="paid">שילמו</option>
           <option value="unpaid">לא שילמו</option>
         </select>
@@ -98,13 +108,14 @@ const BrideCards = () => {
           value={filterHistory}
           onChange={(e) => setFilterHistory(e.target.value)}
           style={{
+            backgroundColor: '#6d4c41',
             padding: '0.75rem',
             fontSize: '1rem',
             borderRadius: '8px',
             border: '2px solid #a67c52'
           }}
         >
-          <option value="">כל הכלות</option>
+          <option value="">סטטוס כלה</option>
           <option value="In Progress">בתהליך</option>
           <option value="Completed">סיימו</option>
         </select>
@@ -116,14 +127,14 @@ const BrideCards = () => {
         borderRadius: '16px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         overflowX: 'auto'
-      }}>
-        <Table sx={{ minWidth: 700, backgroundColor: "#fff" }} aria-label="bride table">
+      }}dir="rtl">
+        <Table dir="rtl" sx={{ minWidth: 700, backgroundColor: "#fff" }} aria-label="bride table">
           <TableHead>
             <TableRow sx={{ backgroundColor: "#e0c097" }}>
-              <TableCell sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>שם מלא</TableCell>
-              <TableCell sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>אימייל</TableCell>
-              <TableCell sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>טלפון</TableCell>
-              <TableCell sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>הצג</TableCell>
+              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>שם מלא</TableCell>
+              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>אימייל</TableCell>
+              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>טלפון</TableCell>
+              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>הצג</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -135,10 +146,10 @@ const BrideCards = () => {
               )
               .map((bride) => (
                 <TableRow key={bride.id} sx={{ '&:hover': { backgroundColor: '#fcefd6' } }}>
-                  <TableCell>{bride.fullName}</TableCell>
-                  <TableCell>{bride.email}</TableCell>
-                  <TableCell>{bride.phone}</TableCell>
-                  <TableCell>
+                  <TableCell align="right">{bride.fullName}</TableCell>
+                  <TableCell align="right">{bride.email}</TableCell>
+                  <TableCell align="right">{bride.phoneNumber}</TableCell>
+                  <TableCell align="right">
                     <Button
                       variant="contained"
                       sx={{
