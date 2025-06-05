@@ -14,6 +14,8 @@ import UserList from './components/UserList';
 import UserCreationForm from './components/UserCreationForm';
 import BrideCards from './components/BrideCards';
 import AppointmentSchedule from './pages/AppointmentSchedule';
+import BridePreparationPage from './pages/BridePreparationPage';
+
 
 function App() {
   return (
@@ -28,6 +30,9 @@ function App() {
         <Route path="/users/new" element={<ProtectedRoute><UserCreationForm /></ProtectedRoute>} />
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />   
+        <Route path="/brides/preparation" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
+        <Route path="/preparation-form" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
+
       </Routes>
     </Router>
   );

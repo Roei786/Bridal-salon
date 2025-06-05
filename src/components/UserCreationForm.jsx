@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
 import { nanoid } from 'nanoid'; 
 import { useSearchParams } from 'react-router-dom';
-import { firebaseConfig } from '../firebase'
-import { initializeApp } from 'firebase/app';
-import { getAuth,  deleteUser } from 'firebase/auth';
-import { deleteApp } from 'firebase/app';
+import { auth, db } from '../firebase';
+import { firebaseConfig } from '../firebase.js';
+import { initializeApp, deleteApp } from 'firebase/app';
 import emailjs from 'emailjs-com';
 
 
