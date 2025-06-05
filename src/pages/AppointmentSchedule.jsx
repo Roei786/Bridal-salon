@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Container, Typography, TextField, MenuItem, Button,
-  Card, CardContent, Table, TableHead, TableRow, TableCell, TableBody, IconButton
+  Card, CardContent, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Box
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -13,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import "./AppointmentSchedule.css"; 
+import "./AppointmentSchedule.css";
 
 const types = ["התאמה", "מדידה ראשונה", "פגישה כללית"];
 const statuses = ["מתוכנן", "הושלם", "בוטל"];
@@ -133,7 +133,7 @@ export default function AppointmentSchedule() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="md" className="appointment-schedule">
+      <Container maxWidth="md" className="appointment-schedule" dir="rtl">
         <Typography variant="h4" className="schedule-title" gutterBottom>
           יומן פגישות
         </Typography>
@@ -143,104 +143,112 @@ export default function AppointmentSchedule() {
             <Typography variant="h6" color="#BC8C61" gutterBottom>
               פגישות קיימות
             </Typography>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>שם</TableCell>
-                  <TableCell>סוג</TableCell>
-                  <TableCell>תאריך</TableCell>
-                  <TableCell>סטטוס</TableCell>
-                  <TableCell>הערות</TableCell>
-                  <TableCell align="center">פעולות</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {appointments.map((appt) => (
-                  <TableRow key={appt.id}>
-                    {editId === appt.id ? (
-                      <>
-                        <TableCell>
-                          <TextField
-                            value={editData.name}
-                            onChange={handleEditChange("name")}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            select
-                            value={editData.type}
-                            onChange={handleEditChange("type")}
-                            size="small"
-                          >
-                            {types.map((type, idx) => (
-                              <MenuItem key={idx} value={type}>{type}</MenuItem>
-                            ))}
-                          </TextField>
-                        </TableCell>
-                        <TableCell>
-                          <DateTimePicker
-                            value={editData.time}
-                            onChange={handleEditDateChange}
-                            slotProps={{ textField: { size: "small" } }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            select
-                            value={editData.status}
-                            onChange={handleEditChange("status")}
-                            size="small"
-                          >
-                            {statuses.map((s, idx) => (
-                              <MenuItem key={idx} value={s}>{s}</MenuItem>
-                            ))}
-                          </TextField>
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            value={editData.notes}
-                            onChange={handleEditChange("notes")}
-                            size="small"
-                            multiline
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton onClick={handleSaveEdit} color="success" title="שמור">
-                            <SaveIcon />
-                          </IconButton>
-                          <IconButton onClick={handleCancelEdit} color="error" title="בטל">
-                            <CancelIcon />
-                          </IconButton>
-                        </TableCell>
-                      </>
-                    ) : (
-                      <>
-                        <TableCell>{appt.name || "-"}</TableCell>
-                        <TableCell>{appt.type}</TableCell>
-                        <TableCell>{appt.date}</TableCell>
-                        <TableCell>{appt.status}</TableCell>
-                        <TableCell>{appt.notes}</TableCell>
-                        <TableCell align="center">
-                          <IconButton onClick={() => handleEditClick(appt)} title="עריכת פגישה">
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton onClick={() => handleDelete(appt.id)} color="error" title="מחיקת פגישה">
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </>
-                    )}
+            <Box sx={{ overflowX: "auto" }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>שם</TableCell>
+                    <TableCell>סוג</TableCell>
+                    <TableCell>תאריך</TableCell>
+                    <TableCell>סטטוס</TableCell>
+                    <TableCell>הערות</TableCell>
+                    <TableCell align="center">פעולות</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {appointments.map((appt) => (
+                    <TableRow key={appt.id}>
+                      {editId === appt.id ? (
+                        <>
+                          <TableCell sx={{ width: 120 }}>
+                            <TextField
+                              value={editData.name}
+                              onChange={handleEditChange("name")}
+                              size="small"
+                              fullWidth
+                            />
+                          </TableCell>
+                          <TableCell sx={{ width: 150 }}>
+                            <TextField
+                              select
+                              value={editData.type}
+                              onChange={handleEditChange("type")}
+                              size="small"
+                              fullWidth
+                            >
+                              {types.map((type, idx) => (
+                                <MenuItem key={idx} value={type}>{type}</MenuItem>
+                              ))}
+                            </TextField>
+                          </TableCell>
+                          <TableCell sx={{ width: 180 }}>
+                            <div dir="ltr">
+                              <DateTimePicker
+                                value={editData.time}
+                                onChange={handleEditDateChange}
+                                slotProps={{ textField: { size: "small", fullWidth: true } }}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell sx={{ width: 130 }}>
+                            <TextField
+                              select
+                              value={editData.status}
+                              onChange={handleEditChange("status")}
+                              size="small"
+                              fullWidth
+                            >
+                              {statuses.map((s, idx) => (
+                                <MenuItem key={idx} value={s}>{s}</MenuItem>
+                              ))}
+                            </TextField>
+                          </TableCell>
+                          <TableCell sx={{ width: 150 }}>
+                            <TextField
+                              value={editData.notes}
+                              onChange={handleEditChange("notes")}
+                              size="small"
+                              fullWidth
+                              multiline
+                            />
+                          </TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                            <IconButton onClick={handleSaveEdit} color="success" title="שמור">
+                              <SaveIcon />
+                            </IconButton>
+                            <IconButton onClick={handleCancelEdit} color="error" title="בטל">
+                              <CancelIcon />
+                            </IconButton>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell>{appt.name || "-"}</TableCell>
+                          <TableCell>{appt.type}</TableCell>
+                          <TableCell>{appt.date}</TableCell>
+                          <TableCell>{appt.status}</TableCell>
+                          <TableCell>{appt.notes}</TableCell>
+                          <TableCell align="center">
+                            <IconButton onClick={() => handleEditClick(appt)} title="עריכה">
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={() => handleDelete(appt.id)} color="error" title="מחק">
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent>
-            <div className="appointment-form">
+            <Box className="appointment-form" dir="rtl">
               <TextField
                 label="שם הלקוחה"
                 variant="outlined"
@@ -259,12 +267,14 @@ export default function AppointmentSchedule() {
                   <MenuItem key={idx} value={type}>{type}</MenuItem>
                 ))}
               </TextField>
-              <DateTimePicker
-                label="תאריך ושעה"
-                value={newAppointment.time}
-                onChange={handleDateChange}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
+              <div dir="ltr">
+                <DateTimePicker
+                  label="תאריך ושעה"
+                  value={newAppointment.time}
+                  onChange={handleDateChange}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </div>
               <TextField
                 label="הערות"
                 variant="outlined"
@@ -288,7 +298,7 @@ export default function AppointmentSchedule() {
               <Button variant="contained" onClick={handleAddAppointment}>
                 הוסף פגישה
               </Button>
-            </div>
+            </Box>
           </CardContent>
         </Card>
       </Container>
