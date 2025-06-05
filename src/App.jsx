@@ -14,6 +14,9 @@ import UserList from './components/UserList';
 import UserCreationForm from './components/UserCreationForm';
 import BrideCards from './components/BrideCards';
 import AppointmentSchedule from './pages/AppointmentSchedule';
+import TheBrideCard from './components/TheBrideCard';
+import BrideHistory from './components/BrideHistory';
+
 
 function App() {
   return (
@@ -25,7 +28,9 @@ function App() {
         <Route path="/calendar" element={<ProtectedRoute><AppointmentSchedule /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
         <Route path="/brides" element={<ProtectedRoute><BrideCards /></ProtectedRoute>} />
+        <Route path="/brides/:brideId" element={<ProtectedRoute><TheBrideCard /></ProtectedRoute>} />
         <Route path="/users/new" element={<ProtectedRoute><UserCreationForm /></ProtectedRoute>} />
+        <Route path="/bride-history" element={<ProtectedRoute><BrideHistory /></ProtectedRoute>} />
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />   
       </Routes>
