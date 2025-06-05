@@ -14,7 +14,11 @@ import UserList from './components/UserList';
 import UserCreationForm from './components/UserCreationForm';
 import BrideCards from './components/BrideCards';
 import AppointmentSchedule from './pages/AppointmentSchedule';
+import BrideHistory from './components/BrideHistory';
 import BridePreparationPage from './pages/BridePreparationPage';
+import TheBrideCard from './components/TheBrideCard';
+
+
 
 
 function App() {
