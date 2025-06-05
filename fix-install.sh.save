@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "🧹 מנקה קבצים ישנים..."
+rm -rf node_modules package-lock.json
+
+echo "🧼 מנקה מטמון של npm..."
+npm cache clean --force
+
+echo "📦 מתקין מחדש את כל התלויות..."
+npm install
+
+echo "🔧 מתקין מחדש את esbuild ל-Mac ARM (Apple Silicon)..."
+npm install esbuild --platform=darwin --arch=arm64
+
+echo "✅ סיום. נסה כעת להריץ: npm run dev"
+
+
