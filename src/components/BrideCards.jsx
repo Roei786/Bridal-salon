@@ -1,9 +1,8 @@
-// בראש הקובץ - ללא שינוי
 import React, { useState, useEffect } from "react";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Checkbox, IconButton
+  TextField, Checkbox, IconButton, Box
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { collection, getDocs, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -120,7 +119,16 @@ const BrideCards = () => {
   );
 
   return (
-    <div style={{ minHeight: '100vh', width: '100vw', background: 'linear-gradient(#fffbe9, #fff5d1)', padding: '2rem' }}>
+    <div style={{
+  height: '100vh',             // קובע גובה קבוע לעמוד
+  width: '100vw',
+  overflow: 'hidden',          // מונע scroll של הדף
+  background: 'linear-gradient(#fffbe9, #fff5d1)',
+  padding: '2rem',
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column'
+}}>
       <h2 style={{ textAlign: 'center', color: '#6d4c41', marginBottom: '2rem', fontSize: '2rem' }}>רשימת כלות</h2>
 
       {/* חיפוש */}
@@ -199,62 +207,88 @@ const BrideCards = () => {
         </div>
       </div>
 
-<div style={{
-  textAlign: 'right',
-  fontSize: '0.9rem',
-  color: '#6d4c41',
-  margin: '0 auto 0.25rem auto',
-  maxWidth: '1000px',
-  paddingInline: '1rem'
-}}>
-  מספר כלות: {filteredBrides.length}
-</div>
+      <div style={{
+        textAlign: 'right',
+        fontSize: '0.9rem',
+        color: '#6d4c41',
+        margin: '0 auto 0.25rem auto',
+        maxWidth: '1000px',
+        paddingInline: '1rem'
+      }}>
+        מספר כלות: {filteredBrides.length}
+      </div>
 
-
-      {/* טבלה */}
-      <TableContainer component={Paper} sx={{ maxWidth: "1000px", margin: "0 auto", borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflowX: 'auto' }} dir="rtl">
-        <Table sx={{ minWidth: 700, backgroundColor: "#fff" }} aria-label="bride table">
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#e0c097" }}>
-              <TableCell />
-              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>שם מלא</TableCell>
-              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>אימייל</TableCell>
-              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>טלפון</TableCell>
-              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>סטטוס תהליך</TableCell>
-              <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>סטטוס תשלום</TableCell>
-              <TableCell align="right" />
-              <TableCell align="right" />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredBrides.map((bride) => (
-              <TableRow key={bride.id} sx={{ '&:hover': { backgroundColor: '#fcefd6' } }}>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selectedBrides.includes(bride.id)}
-                    onChange={() => handleSelectBride(bride.id)}
-                  />
-                </TableCell>
-                <TableCell align="right">{bride.fullName}</TableCell>
-                <TableCell align="right">{bride.email}</TableCell>
-                <TableCell align="right">{bride.phoneNumber}</TableCell>
-                <TableCell align="right">{bride.historyStatus === 'Completed' ? 'סיימה' : 'בתהליך'}</TableCell>
-                <TableCell align="right">{bride.paymentStatus ? 'שילמה' : 'לא שילמה'}</TableCell>
-                <TableCell align="right">
-                  <Button variant="contained" sx={{
-                    backgroundColor: "#a67c52", '&:hover': { backgroundColor: "#8b5e3c" },
-                    fontWeight: 'bold'
-                  }}
-                    onClick={() => navigate(`/brides/${bride.id}`)}>הצג</Button>
-                </TableCell>
-                <TableCell align="right">
-                  <IconButton onClick={() => handleDeleteBride(bride.id)}><DeleteIcon color="error" /></IconButton>
-                </TableCell>
+      {/* טבלה בתוך Box עם scrollbar מעוצב */}
+      <Box
+        sx={{
+          flex: 1,
+          width: '100%',
+          maxWidth: '1000px',
+          margin: '0 auto',
+          borderRadius: '16px',
+          overflowY: 'scroll',
+          maxHeight: '500px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          backgroundColor: '#fff',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#c0a98f',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: '#a67c52',
+          }
+        }}
+      >
+        <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+          <Table dir="rtl" sx={{ minWidth: 700, backgroundColor: "#fff" }} aria-label="bride table">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#e0c097" }}>
+                <TableCell />
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>שם מלא</TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>אימייל</TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>טלפון</TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>סטטוס תהליך</TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>סטטוס תשלום</TableCell>
+                <TableCell align="right" />
+                <TableCell align="right" />
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredBrides.map((bride) => (
+                <TableRow key={bride.id} sx={{ '&:hover': { backgroundColor: '#fcefd6' } }}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedBrides.includes(bride.id)}
+                      onChange={() => handleSelectBride(bride.id)}
+                    />
+                  </TableCell>
+                  <TableCell align="right">{bride.fullName}</TableCell>
+                  <TableCell align="right">{bride.email}</TableCell>
+                  <TableCell align="right">{bride.phoneNumber}</TableCell>
+                  <TableCell align="right">{bride.historyStatus === 'Completed' ? 'סיימה' : 'בתהליך'}</TableCell>
+                  <TableCell align="right">{bride.paymentStatus ? 'שילמה' : 'לא שילמה'}</TableCell>
+                  <TableCell align="right">
+                    <Button variant="contained" sx={{
+                      backgroundColor: "#a67c52", '&:hover': { backgroundColor: "#8b5e3c" },
+                      fontWeight: 'bold'
+                    }}
+                      onClick={() => navigate(`/brides/${bride.id}`)}>הצג</Button>
+                  </TableCell>
+                  <TableCell align="right">
+                    <IconButton onClick={() => handleDeleteBride(bride.id)}><DeleteIcon color="error" /></IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
 
       {/* דיאלוג הוספה */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} dir="rtl">
