@@ -17,7 +17,7 @@ import AppointmentSchedule from './pages/AppointmentSchedule';
 import BrideHistory from './components/BrideHistory';
 import BridePreparationPage from './pages/BridePreparationPage';
 import TheBrideCard from './components/TheBrideCard';
-
+import Layout from './components/Layout';
 
 
 
@@ -27,7 +27,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard"element={ <ProtectedRoute>  <Dashboard /> </ProtectedRoute>} />
+       <Route element={<Layout />}>
+           <Route path="/dashboard"element={ <ProtectedRoute>  <Dashboard /> </ProtectedRoute>} />
         <Route path="/calendar" element={<ProtectedRoute><AppointmentSchedule /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
         <Route path="/brides" element={<ProtectedRoute><BrideCards /></ProtectedRoute>} />
@@ -38,8 +39,8 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />   
         <Route path="/brides/preparation" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
         <Route path="/preparation-form" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
-
-      </Routes>
+        </Route>
+        </Routes>
     </Router>
   );
 }
