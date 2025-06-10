@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import React, { useEffect, useState } from 'react';
 import { AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -6,6 +7,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Navbar({ onToggleMenu }) {
   const { fullName, role } = useAuth();
@@ -14,7 +17,19 @@ export default function Navbar({ onToggleMenu }) {
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate('/');
+    toast.success("👋 התנתקת בהצלחה", {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
+      progress: undefined,
+    });
+
+    setTimeout(() => {
+      navigate('/');
+    }, 2000);
   };
 
   useEffect(() => {
@@ -39,29 +54,38 @@ export default function Navbar({ onToggleMenu }) {
         backdropFilter: 'blur(10px)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
         zIndex: 1100,
-        direction: 'rtl'
+        direction: 'rtl',
+        paddingX: 2
       }}
     >
-      <Toolbar sx={{ display: 'flex', alignItems: 'center' }}>
-        {/* כפתור ☰ ו־שם המשתמש */}
-        <Box display="flex" alignItems="center" gap={2}>
-          <IconButton onClick={onToggleMenu} color="inherit">
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6">{fullName || 'משתמש'}</Typography>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        
+        {/* ☰ תפריט צד */}
+        <IconButton onClick={onToggleMenu} color="inherit">
+          <MenuIcon />
+        </IconButton>
+
+        {/* אמצע – תפקיד ושעה */}
+        <Box textAlign="center">
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+            {role === 'manager' ? 'מנהלת' : 'עובד'}
+          </Typography>
+          <Typography sx={{ fontSize: '1rem' }}>{timeStr}</Typography>
         </Box>
 
-        {/* הצד השמאלי – מרווח אוטומטי כדי לדחוף ימינה */}
-        <Box display="flex" alignItems="center" gap={2} sx={{ ml: 'auto' }}>
-          <Typography>{role === 'manager' ? 'מנהל' : 'עובד'}</Typography>
-          <Typography>{timeStr}</Typography>
-          <IconButton onClick={handleLogout} color="inherit">
-            <LogoutIcon />
-          </IconButton>
-        </Box>
+        {/* צד שמאל – שם וכפתור יציאה */}
+        <Box display="flex" alignItems="center" gap={1}>
+    <Typography sx={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+    {fullName || 'משתמש'}
+    </Typography>
+    <IconButton onClick={handleLogout} color="inherit">
+    <LogoutIcon />
+    </IconButton>
+      </Box>
       </Toolbar>
+
+      {/* Toast Container */}
+      <ToastContainer />
     </AppBar>
   );
 }
-
-
