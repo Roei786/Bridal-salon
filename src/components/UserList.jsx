@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { updateDoc } from 'firebase/firestore'; 
 import {
   Table,
   TableBody,
@@ -44,17 +45,21 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
-  const handleDelete = async (userId) => {
-    const confirmed = window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש?');
-    if (!confirmed) return;
 
-    try {
-      await deleteDoc(doc(db, 'users', userId));
-      setUsers(prev => prev.filter(user => user.id !== userId));
-    } catch (error) {
-      console.error('שגיאה במחיקת המשתמש:', error);
-    }
-  };
+const handleDelete = async (userId) => {
+  const confirmed = window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש?');
+  if (!confirmed) return;
+
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, { deleted: true });
+
+    setUsers(prev => prev.filter(user => user.id !== userId));
+  } catch (error) {
+    console.error('שגיאה בסימון המשתמש כמחוק:', error);
+  }
+};
+
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -66,17 +71,21 @@ const UserList = () => {
   };
 
   const filteredUsers = users
-    .filter(user => user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => {
-      const dir = sortDir === 'asc' ? 1 : -1;
-      if (sortBy === 'fullName') {
-        return a.fullName.localeCompare(b.fullName) * dir;
-      } else if (sortBy === 'role') {
-        const roleValue = r => (r === 'manager' ? 0 : 1);
-        return (roleValue(a.role) - roleValue(b.role)) * dir;
-      }
-      return 0;
-    });
+  .filter(user =>
+    !user.deleted &&  
+    user.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  .sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    if (sortBy === 'fullName') {
+      return a.fullName.localeCompare(b.fullName) * dir;
+    } else if (sortBy === 'role') {
+      const roleValue = r => (r === 'manager' ? 0 : 1);
+      return (roleValue(a.role) - roleValue(b.role)) * dir;
+    }
+    return 0;
+  });
+
 
   const renderSortIcon = (column) => {
     if (sortBy === column) {
