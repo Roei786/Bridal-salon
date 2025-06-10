@@ -1,60 +1,59 @@
-/* רקע מלא על כל המסך */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #fdf6e3; /* בז' עדין */
+    background-color: #fdf6e3;
     font-family: 'Varela Round', sans-serif;
   }
   
-  /* קונטיינר ראשי */
   .bride-prep-container {
-    direction: rtl;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #4a4a4a;
+    direction: rtl;
     padding: 2rem;
+    box-sizing: border-box;
+    color: #4a4a4a;
   }
   
-  /* כותרת */
   .bride-prep-title {
     color: #7a5c6d;
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
     text-align: center;
   }
   
-  /* הטופס */
   .bride-prep-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    max-width: 400px;
-    width: 100%;
-    background-color: #fff;
+    background-color: #ffffff;
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* תוויות */
-  .bride-prep-form label {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-sizing: border-box;
+  }
+  
+  .bride-prep-section {
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+  }
+  
+  .bride-prep-input {
+    padding: 0.6rem;
     font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    direction: rtl;
   }
   
-  /* צ'קבוקס */
-  .bride-prep-form input[type="checkbox"] {
-    transform: scale(1.2);
-  }
-  
-  /* כפתור */
-  .bride-prep-form button {
+  .bride-prep-form button[type="submit"],
+  .back-button {
     background-color: #c4a484;
     color: white;
     border: none;
@@ -63,9 +62,32 @@ html, body {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 0.5rem;
   }
   
-  .bride-prep-form button:hover {
+  .bride-prep-form button:hover,
+  .back-button:hover {
     background-color: #b29373;
+  }
+  
+  /* רספונסיביות מלאה */
+  @media (max-width: 600px) {
+    .bride-prep-form {
+      padding: 1.2rem;
+    }
+  
+    .bride-prep-title {
+      font-size: 1.5rem;
+    }
+  
+    .bride-prep-input {
+      font-size: 0.95rem;
+    }
+  
+    .bride-prep-form button,
+    .back-button {
+      font-size: 0.95rem;
+    }
   }
   

@@ -35,7 +35,7 @@ const BridePreparationPage = () => {
             checked={formData.makeup}
             onChange={handleChange}
           />
-          מאפרת נקבעה
+          מאפרת 
         </label>
 
         <label>
@@ -45,7 +45,7 @@ const BridePreparationPage = () => {
             checked={formData.hair}
             onChange={handleChange}
           />
-          מעצבת שיער נקבעה
+          מעצבת שיער 
         </label>
 
         <label>
@@ -55,7 +55,7 @@ const BridePreparationPage = () => {
             checked={formData.breakfast}
             onChange={handleChange}
           />
-          ארוחת בוקר תואמה
+          ארוחת בוקר 
         </label>
 
         <label>
@@ -65,7 +65,7 @@ const BridePreparationPage = () => {
             checked={formData.salonClean}
             onChange={handleChange}
           />
-          הסלון נקי ליום ההגעה
+          הסלון נקי
         </label>
 
         <button type="submit">שמור</button>

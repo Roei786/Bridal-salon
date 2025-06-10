@@ -1,0 +1,113 @@
+.manager-dashboard {
+    direction: rtl;
+    font-family: 'Varela Round', sans-serif;
+    height: 100vh;
+    background-color: #fdf6e3;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  /* רקע כהה */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+  }
+  
+  /* סרגל צד */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    height: 100%;
+    width: 260px;
+    background-color: #8c6d85;
+    color: white;
+    padding: 1.5rem 1rem;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar.open {
+    right: 0;
+  }
+  
+  .sidebar-header h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.4rem;
+    border-bottom: 1px solid #ffffff44;
+    padding-bottom: 0.5rem;
+  }
+  
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar-list li {
+    margin-bottom: 1rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.2s ease;
+  }
+  
+  .sidebar-list li:hover {
+    color: #ffebc3;
+  }
+  
+  .sidebar-icon {
+    margin-left: 0.5rem;
+  }
+  
+  /* כפתור ✖ לסגירה */
+  .close-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  .close-btn:hover {
+    color: #ffebc3;
+  }
+  
+  
+  /* תוכן ראשי */
+  .dashboard-content {
+    margin: auto;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  /* רספונסיביות */
+  @media (max-width: 600px) {
+    .sidebar {
+      width: 220px;
+      padding: 1rem;
+    }
+  
+    .sidebar-header h2 {
+      font-size: 1.2rem;
+    }
+  
+    .sidebar-list li {
+      font-size: 1rem;
+    }
+  
+    .dashboard-content {
+      padding: 1rem;
+    }
+  }
+  
