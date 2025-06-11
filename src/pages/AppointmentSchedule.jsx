@@ -1,307 +1,202 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'moment/locale/he';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './AppointmentSchedule.css';
 import {
-  Container, Typography, TextField, MenuItem, Button,
-  Card, CardContent, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Box
-} from "@mui/material";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import { db } from "../firebase";
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import "./AppointmentSchedule.css";
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField
+} from '@mui/material';
+import dayjs from 'dayjs';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+} from 'firebase/firestore';
+import { db } from '../firebase';
 
-const types = ["התאמה", "מדידה ראשונה", "פגישה כללית"];
-const statuses = ["מתוכנן", "הושלם", "בוטל"];
+moment.locale('he');
+const localizer = momentLocalizer(moment);
 
-export default function AppointmentSchedule() {
+const AppointmentSchedule = () => {
   const [appointments, setAppointments] = useState([]);
-  const [newAppointment, setNewAppointment] = useState({
-    name: "",
-    type: "",
-    time: dayjs(),
-    notes: "",
-    status: "מתוכנן",
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    date: '',
+    time: ''
   });
 
-  const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({});
-
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      const snapshot = await getDocs(collection(db, "appointments"));
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setAppointments(data);
-    };
-    fetchAppointments();
+  const fetchAppointments = useCallback(async () => {
+    const querySnapshot = await getDocs(collection(db, 'appointments'));
+    const data = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setAppointments(data.map(app => ({
+      ...app,
+      start: new Date(app.date + ' ' + app.time),
+      end: new Date(dayjs(app.date + ' ' + app.time).add(1, 'hour'))
+    })));
   }, []);
 
-  const handleChange = (field) => (event) => {
-    setNewAppointment({ ...newAppointment, [field]: event.target.value });
-  };
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
-  const handleDateChange = (newValue) => {
-    setNewAppointment({ ...newAppointment, time: newValue });
-  };
-
-  const handleAddAppointment = async () => {
-    const { name, type, time, notes, status } = newAppointment;
-
-    if (name && type && time) {
-      const appointmentData = {
-        name,
-        date: dayjs(time).format("YYYY-MM-DD"),
-        type,
-        notes,
-        status,
-      };
-
-      try {
-        const docRef = await addDoc(collection(db, "appointments"), appointmentData);
-        setAppointments([...appointments, { ...appointmentData, id: docRef.id }]);
-        setNewAppointment({
-          name: "",
-          type: "",
-          time: dayjs(),
-          notes: "",
-          status: "מתוכנן",
-        });
-      } catch (error) {
-        console.error("Error adding document: ", error);
-      }
-    }
-  };
-
-  const handleEditClick = (appt) => {
-    setEditId(appt.id);
-    setEditData({
-      name: appt.name || "",
-      type: appt.type || "",
-      time: dayjs(appt.date),
-      notes: appt.notes || "",
-      status: appt.status || "מתוכנן",
+  const handleSelectSlot = ({ start }) => {
+    setSelectedDate(start);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      date: dayjs(start).format('YYYY-MM-DD'),
+      time: dayjs(start).format('HH:mm')
     });
+    setSelectedEvent(null);
+    setOpen(true);
   };
 
-  const handleEditChange = (field) => (event) => {
-    setEditData({ ...editData, [field]: event.target.value });
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
+    setFormData({
+      name: event.name,
+      email: event.email,
+      phone: event.phone,
+      date: dayjs(event.start).format('YYYY-MM-DD'),
+      time: dayjs(event.start).format('HH:mm')
+    });
+    setOpen(true);
   };
 
-  const handleEditDateChange = (newValue) => {
-    setEditData({ ...editData, time: newValue });
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedEvent(null);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editId) return;
+  const handleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
-    const updatedData = {
-      name: editData.name,
-      date: dayjs(editData.time).format("YYYY-MM-DD"),
-      type: editData.type,
-      notes: editData.notes,
-      status: editData.status,
-    };
-
-    try {
-      const docRef = doc(db, "appointments", editId);
-      await updateDoc(docRef, updatedData);
-      setAppointments(appointments.map(appt => appt.id === editId ? { id: editId, ...updatedData } : appt));
-      setEditId(null);
-      setEditData({});
-    } catch (error) {
-      console.error("Error updating document: ", error);
+  const handleSubmit = async () => {
+    const { name, email, phone, date, time } = formData;
+    if (selectedEvent) {
+      const ref = doc(db, 'appointments', selectedEvent.id);
+      await updateDoc(ref, { name, email, phone, date, time });
+    } else {
+      await addDoc(collection(db, 'appointments'), { name, email, phone, date, time });
     }
+    fetchAppointments();
+    handleClose();
   };
 
-  const handleCancelEdit = () => {
-    setEditId(null);
-    setEditData({});
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteDoc(doc(db, "appointments", id));
-      setAppointments(appointments.filter(appt => appt.id !== id));
-    } catch (error) {
-      console.error("Error deleting document: ", error);
+  const handleDelete = async () => {
+    if (selectedEvent) {
+      await deleteDoc(doc(db, 'appointments', selectedEvent.id));
+      fetchAppointments();
+      handleClose();
     }
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Container maxWidth="md" className="appointment-schedule" dir="rtl">
-        <Typography variant="h4" className="schedule-title" gutterBottom>
-          יומן פגישות
-        </Typography>
+    <div className="appointment-schedule" dir="rtl">
+      <div className="schedule-header">
+        <h2>יומן פגישות</h2>
+      </div>
+      <div className="calendar-container">
+        <Calendar
+          localizer={localizer}
+          events={appointments}
+          startAccessor="start"
+          endAccessor="end"
+          titleAccessor="name"
+          style={{ height: '75vh', minHeight: 650 }}
+          selectable
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          views={['month', 'week', 'day']}
+          defaultView="month"
+          culture="he"
+        />
+      </div>
 
-        <Card className="appointment-list" sx={{ mb: 4 }}>
-          <CardContent>
-            <Typography variant="h6" color="#BC8C61" gutterBottom>
-              פגישות קיימות
-            </Typography>
-            <Box sx={{ overflowX: "auto" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>שם</TableCell>
-                    <TableCell>סוג</TableCell>
-                    <TableCell>תאריך</TableCell>
-                    <TableCell>סטטוס</TableCell>
-                    <TableCell>הערות</TableCell>
-                    <TableCell align="center">פעולות</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {appointments.map((appt) => (
-                    <TableRow key={appt.id}>
-                      {editId === appt.id ? (
-                        <>
-                          <TableCell sx={{ width: 120 }}>
-                            <TextField
-                              value={editData.name}
-                              onChange={handleEditChange("name")}
-                              size="small"
-                              fullWidth
-                            />
-                          </TableCell>
-                          <TableCell sx={{ width: 150 }}>
-                            <TextField
-                              select
-                              value={editData.type}
-                              onChange={handleEditChange("type")}
-                              size="small"
-                              fullWidth
-                            >
-                              {types.map((type, idx) => (
-                                <MenuItem key={idx} value={type}>{type}</MenuItem>
-                              ))}
-                            </TextField>
-                          </TableCell>
-                          <TableCell sx={{ width: 180 }}>
-                            <div dir="ltr">
-                              <DateTimePicker
-                                value={editData.time}
-                                onChange={handleEditDateChange}
-                                slotProps={{ textField: { size: "small", fullWidth: true } }}
-                              />
-                            </div>
-                          </TableCell>
-                          <TableCell sx={{ width: 130 }}>
-                            <TextField
-                              select
-                              value={editData.status}
-                              onChange={handleEditChange("status")}
-                              size="small"
-                              fullWidth
-                            >
-                              {statuses.map((s, idx) => (
-                                <MenuItem key={idx} value={s}>{s}</MenuItem>
-                              ))}
-                            </TextField>
-                          </TableCell>
-                          <TableCell sx={{ width: 150 }}>
-                            <TextField
-                              value={editData.notes}
-                              onChange={handleEditChange("notes")}
-                              size="small"
-                              fullWidth
-                              multiline
-                            />
-                          </TableCell>
-                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                            <IconButton onClick={handleSaveEdit} color="success" title="שמור">
-                              <SaveIcon />
-                            </IconButton>
-                            <IconButton onClick={handleCancelEdit} color="error" title="בטל">
-                              <CancelIcon />
-                            </IconButton>
-                          </TableCell>
-                        </>
-                      ) : (
-                        <>
-                          <TableCell>{appt.name || "-"}</TableCell>
-                          <TableCell>{appt.type}</TableCell>
-                          <TableCell>{appt.date}</TableCell>
-                          <TableCell>{appt.status}</TableCell>
-                          <TableCell>{appt.notes}</TableCell>
-                          <TableCell align="center">
-                            <IconButton onClick={() => handleEditClick(appt)} title="עריכה">
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton onClick={() => handleDelete(appt.id)} color="error" title="מחק">
-                              <DeleteIcon />
-                            </IconButton>
-                          </TableCell>
-                        </>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Box className="appointment-form" dir="rtl">
-              <TextField
-                label="שם הלקוחה"
-                variant="outlined"
-                value={newAppointment.name}
-                onChange={handleChange("name")}
-                fullWidth
-              />
-              <TextField
-                select
-                label="סוג פגישה"
-                value={newAppointment.type}
-                onChange={handleChange("type")}
-                fullWidth
-              >
-                {types.map((type, idx) => (
-                  <MenuItem key={idx} value={type}>{type}</MenuItem>
-                ))}
-              </TextField>
-              <div dir="ltr">
-                <DateTimePicker
-                  label="תאריך ושעה"
-                  value={newAppointment.time}
-                  onChange={handleDateChange}
-                  slotProps={{ textField: { fullWidth: true } }}
-                />
-              </div>
-              <TextField
-                label="הערות"
-                variant="outlined"
-                value={newAppointment.notes}
-                onChange={handleChange("notes")}
-                fullWidth
-                multiline
-                rows={2}
-              />
-              <TextField
-                select
-                label="סטטוס"
-                value={newAppointment.status}
-                onChange={handleChange("status")}
-                fullWidth
-              >
-                {statuses.map((s, idx) => (
-                  <MenuItem key={idx} value={s}>{s}</MenuItem>
-                ))}
-              </TextField>
-              <Button variant="contained" onClick={handleAddAppointment}>
-                הוסף פגישה
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
-      </Container>
-    </LocalizationProvider>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth dir="rtl">
+        <DialogTitle>{selectedEvent ? 'עריכת פגישה' : 'פגישה חדשה'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="שם"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="אימייל"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="טלפון"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="תאריך"
+            name="date"
+            type="date"
+            value={formData.date}
+            onChange={handleChange}
+            fullWidth
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+         <TextField
+            margin="dense"
+            label="שעה"
+            name="time"
+            type="time"
+            value={formData.time}
+            onChange={handleChange}
+            fullWidth
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </DialogContent>
+        <DialogActions>
+          {selectedEvent && (
+            <Button onClick={handleDelete} color="error">
+              מחק
+            </Button>
+          )}
+          <Button onClick={handleClose}>ביטול</Button>
+          <Button onClick={handleSubmit} variant="contained">
+            {selectedEvent ? 'עדכן' : 'הוסף'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
-}
+};
+
+export default AppointmentSchedule;

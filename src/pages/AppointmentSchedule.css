@@ -1,73 +1,294 @@
-/* Layout container */
 .appointment-schedule {
-  padding: 2rem;
+  padding: 20px;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
-  min-width: 100vw;
-  background: linear-gradient(#fffbe9, #fff5d1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%; /* Ensure width is 100% */
+  box-sizing: border-box; /* Important for padding */
+  overflow-x: hidden; /* Hide horizontal overflow */
 }
 
-/* Header title */
-.schedule-title {
-  font-size: 2rem;
-  color: #BC8C61;
-  margin-bottom: 2rem;
+.schedule-header {
   text-align: center;
+  margin-bottom: 30px;
 }
 
-/* Form container */
-.appointment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 500px;
-  margin-bottom: 2rem;
-}
-
-/* Appointments list */
-.appointment-list {
-  width: 100%;
-  max-width: 600px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Individual appointment card (Card component) */
-.appointment-card {
-  background-color: white;
-  border-left: 5px solid #BC8C61;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Appointment card text */
-.appointment-card h4 {
+.schedule-header h2 {
   color: #BC8C61;
-  margin: 0 0 0.5rem 0;
-}
-
-.appointment-card p {
+  font-size: 2.2rem;
+  font-weight: 600;
   margin: 0;
-  color: #6d4c41; /* Soft brown for secondary text */
-  font-size: 0.95rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.appointment-form button {
+.calendar-container {
+  width: 95%; /* Example: adjust to your desired width, could be 100% or a fixed max-width */
+  max-width: none; /* Remove max-width to allow it to be wider, or set a higher value */
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  box-sizing: border-box; /* Important for padding */
+}
+
+/* Calendar base styling */
+.rbc-calendar {
+  background-color: transparent;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Toolbar styling */
+.rbc-toolbar {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6d4c41;
+  padding: 10px 0;
+}
+
+.rbc-toolbar button {
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.rbc-toolbar button:hover {
   background-color: #BC8C61;
   color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 0.75rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.appointment-form button:hover {
+.rbc-toolbar button.rbc-active {
+  background-color: #BC8C61;
+  color: white;
+}
+
+/* Month view styling */
+.rbc-month-view {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rbc-month-row {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+/* Header row styling */
+.rbc-header {
+  background-color: #f5f5f5;
+  color: #6d4c41;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 15px 8px;
+  border-bottom: 2px solid #BC8C61;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Date cell styling */
+.rbc-date-cell {
+  padding: 12px 8px;
+  min-height: 80px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.rbc-date-cell button {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  padding: 8px;
+  border-radius: 6px;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.rbc-date-cell button:hover {
+  background-color: #BC8C61;
+  color: white;
+}
+
+/* Today styling */
+.rbc-today {
+  background-color: #fff8e1;
+  border: 2px solid #BC8C61;
+}
+
+.rbc-today .rbc-button-link {
+  background-color: #BC8C61;
+  color: white;
+  border-radius: 50%;
+}
+
+/* Off-range dates */
+.rbc-off-range {
+  color: #bbb;
+}
+
+.rbc-off-range-bg {
+  background-color: #fafafa;
+}
+
+/* Event styling */
+.rbc-event {
+  background-color: #BC8C61;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9em; /* Adjusted font size */
+  font-weight: 500;
+  border: none;
+  margin: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: normal; /* Allow text to wrap */
+  overflow: visible; /* Ensure text is visible */
+  text-overflow: clip; /* Prevent ellipsis for more content */
+}
+
+.rbc-event:hover {
   background-color: #a37455;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rbc-selected {
+  background-color: #a37455 !important;
+  box-shadow: 0 0 0 2px #6d4c41;
+}
+
+/* Event content */
+.rbc-event-content {
+  font-weight: 500;
+  white-space: normal; /* Allow text to wrap */
+  overflow: visible; /* Ensure content is visible */
+  text-overflow: clip; /* Prevent ellipsis */
+}
+
+/* Slot selection */
+.rbc-slot-selection {
+  background-color: rgba(188, 140, 97, 0.2);
+  border: 2px solid #BC8C61;
+}
+
+/* Show more link */
+.rbc-show-more {
+  color: #BC8C61;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(188, 140, 97, 0.1);
+}
+
+.rbc-show-more:hover {
+  background-color: rgba(188, 140, 97, 0.2);
+  text-decoration: none;
+}
+
+/* Dialog styling */
+.MuiDialogTitle-root {
+  background-color: #fffbe9;
+  color: #6d4c41;
+  font-weight: bold;
+  font-size: 1.3rem;
+  padding: 20px 24px;
+}
+
+.MuiDialogContent-root {
+  padding: 24px;
+}
+
+.MuiDialogActions-root {
+  padding: 16px 24px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.MuiTextField-root {
+  margin-bottom: 16px;
+}
+
+.MuiTextField-root .MuiInputLabel-root {
+  font-size: 1rem;
+}
+
+.MuiTextField-root .MuiInputBase-input {
+  font-size: 1rem;
+  padding: 12px 14px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .appointment-schedule {
+    padding: 10px;
+  }
+
+  .calendar-container {
+    padding: 10px;
+    width: 95%; /* Adjust for smaller screens */
+  }
+
+  .rbc-calendar {
+    font-size: 14px;
+  }
+
+  .rbc-toolbar {
+    font-size: 1rem;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rbc-toolbar button {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+
+  .rbc-header {
+    font-size: 0.9rem;
+    padding: 10px 4px;
+  }
+
+  .rbc-date-cell {
+    min-height: 60px;
+    padding: 8px 4px;
+  }
+
+  .rbc-event {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+  }
+
+  .schedule-header h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .rbc-toolbar {
+    justify-content: center;
+  }
+
+  .rbc-toolbar .rbc-toolbar-label {
+    flex: 1;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .rbc-date-cell {
+    min-height: 50px;
+  }
+
+  .rbc-event {
+    font-size: 0.8rem;
+    padding: 3px 5px;
+  }
 }
