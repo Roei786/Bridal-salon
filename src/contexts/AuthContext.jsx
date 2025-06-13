@@ -27,7 +27,6 @@ export function AuthProvider({ children }) {
 
         if (userDoc.exists()) {
           const data = userDoc.data();
-          console.log('📥 role נטען מ-Firestore:', data.role);
           setRole(data.role || null);
           setFullName(data.fullName || '');
         } else {
