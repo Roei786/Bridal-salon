@@ -1,8 +1,18 @@
 // src/components/Navbar.jsx
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem
+} from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -10,10 +20,36 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+function stringToColor(string) {
+  let hash = 0;
+  let i;
+  for (i = 0; i < string.length; i++) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += ('00' + value.toString(16)).slice(-2);
+  }
+  return color;
+}
+
+function stringAvatar(name) {
+  const parts = name.split(' ');
+  return {
+    sx: {
+      bgcolor: stringToColor(name),
+    },
+    children: `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`,
+  };
+}
+
 export default function Navbar({ onToggleMenu }) {
   const { fullName, role } = useAuth();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -26,10 +62,15 @@ export default function Navbar({ onToggleMenu }) {
       draggable: false,
       progress: undefined,
     });
+    setTimeout(() => navigate('/'), 2000);
+  };
 
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -40,18 +81,15 @@ export default function Navbar({ onToggleMenu }) {
   }, []);
 
   const timeStr = currentTime.toLocaleTimeString('he-IL', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 
   return (
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: 'rgba(92, 39, 93, 0.6)',
+        background: 'linear-gradient(to left, #c89ddc, #7e57c2)',
         color: '#fff',
-        backdropFilter: 'blur(10px)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
         zIndex: 1100,
         direction: 'rtl',
@@ -59,42 +97,42 @@ export default function Navbar({ onToggleMenu }) {
       }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        
-        {/* ☰ תפריט צד */}
-        <IconButton
-          onClick={() => {
-            console.log('☰ clicked!');
-            if (typeof onToggleMenu === 'function') {
-              onToggleMenu();
-            } else {
-              console.warn('❗ onToggleMenu is not defined');
-            }
-          }}
-          color="inherit"
-        >
-          <MenuIcon />
-        </IconButton>
 
-        {/* אמצע – תפקיד ושעה */}
+        {/* Right Side – Logo & Sidebar Toggle */}
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton onClick={onToggleMenu} color="inherit">
+            <MenuIcon />
+          </IconButton>
+          <IconButton onClick={() => navigate('/dashboard')} color="inherit">
+            <HomeIcon fontSize="medium" />
+          </IconButton>
+        </Box>
+
+        {/* Middle – Role and Time */}
         <Box textAlign="center">
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-  {role === 'manager' ? '🟢 מנהלת חדשה' : '🟢 עובד חדש'}
-</Typography>
-
+          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+              {fullName}
+          </Typography>
           <Typography sx={{ fontSize: '1rem' }}>{timeStr}</Typography>
         </Box>
 
-        {/* צד שמאל – שם וכפתור יציאה */}
+        {/* Left Side – Avatar & Menu */}
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography sx={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
-            {fullName || 'משתמש'}
-          </Typography>
-          <IconButton onClick={handleLogout} color="inherit">
-            <LogoutIcon />
+          <IconButton onClick={handleAvatarClick} color="inherit">
+            <Avatar {...stringAvatar(fullName || 'משתמש')} />
           </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem onClick={handleLogout}>התנתק</MenuItem>
+            {/* ניתן להוסיף כאן אופציות נוספות */}
+          </Menu>
         </Box>
       </Toolbar>
-
       <ToastContainer />
     </AppBar>
   );
