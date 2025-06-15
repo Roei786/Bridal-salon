@@ -1,6 +1,5 @@
+// src/components/ManagerDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Box,
@@ -18,25 +17,11 @@ import { db } from '../firebase';
 import './ManagerDashboard.css';
 
 export default function ManagerDashboard() {
-  const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { fullName } = useAuth();
-
   const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState('week');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const buttons = [
-    { label: 'ניהול משתמשים', icon: '👤', path: '/users' },
-    { label: 'כרטיסיות כלות', icon: '👰', path: '/brides' },
-    { label: 'טופס התארגנות', icon: '📝', path: '/preparation-form' },
-    { label: 'יומן פגישות', icon: '📅', path: '/calendar' },
-    { label: 'היסטוריית כלות', icon: '📖', path: '/bride-history' },
-    { label: 'כניסה/יציאה', icon: '🔐', path: '/attendance' },
-    { label: 'הפקת דוחות', icon: '📊', path: '/reports' },
-    { label: 'שליחת טופס מדידה', icon: '✉️', path: '/send-measurement' },
-    { label: 'שלח תזכורת', icon: '📨', path: '/send-reminder' },
-  ];
+  const now = new Date();
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -51,50 +36,29 @@ export default function ManagerDashboard() {
     fetchAppointments();
   }, []);
 
-  const now = new Date();
-
-  const filteredAppointments = appointments.filter(app => {
-    const appDate = new Date(app.date);
-    if (filter === 'day') {
-      return appDate.toDateString() === now.toDateString();
-    } else if (filter === 'week') {
-      const oneWeekLater = new Date();
-      oneWeekLater.setDate(now.getDate() + 7);
-      return appDate >= now && appDate <= oneWeekLater;
-    } else if (filter === 'month') {
-      return appDate.getMonth() === now.getMonth() && appDate.getFullYear() === now.getFullYear();
-    }
-    return true;
-  }).filter(app => {
-    const name = app.name?.toLowerCase() || '';
-    const title = app.title?.toLowerCase() || '';
-    return name.includes(searchQuery.toLowerCase()) || title.includes(searchQuery.toLowerCase());
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const filteredAppointments = appointments
+    .filter(app => {
+      const appDate = new Date(app.date);
+      if (filter === 'day') {
+        return appDate.toDateString() === now.toDateString();
+      } else if (filter === 'week') {
+        const oneWeekLater = new Date();
+        oneWeekLater.setDate(now.getDate() + 7);
+        return appDate >= now && appDate <= oneWeekLater;
+      } else if (filter === 'month') {
+        return appDate.getMonth() === now.getMonth() && appDate.getFullYear() === now.getFullYear();
+      }
+      return true;
+    })
+    .filter(app => {
+      const name = app.name?.toLowerCase() || '';
+      const title = app.title?.toLowerCase() || '';
+      return name.includes(searchQuery.toLowerCase()) || title.includes(searchQuery.toLowerCase());
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
     <div className="manager-dashboard" dir="rtl">
-      <Navbar onToggleMenu={() => setIsSidebarOpen(prev => !prev)} />
-
-      {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />
-      )}
-
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <h2>תפריט מנהלת</h2>
-        </div>
-        <ul className="sidebar-list">
-          {buttons.map((btn, idx) => (
-            <li key={idx} onClick={() => {
-              navigate(btn.path);
-              setIsSidebarOpen(false);
-            }}>
-              <span className="sidebar-icon">{btn.icon}</span> {btn.label}
-            </li>
-          ))}
-        </ul>
-      </div>
-
       <div className="dashboard-content">
         <Typography variant="h4" gutterBottom>
           שלום {fullName || 'משתמש'} 👋

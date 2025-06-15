@@ -61,30 +61,40 @@ export default function Navbar({ onToggleMenu }) {
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         
         {/* ☰ תפריט צד */}
-        <IconButton onClick={onToggleMenu} color="inherit">
+        <IconButton
+          onClick={() => {
+            console.log('☰ clicked!');
+            if (typeof onToggleMenu === 'function') {
+              onToggleMenu();
+            } else {
+              console.warn('❗ onToggleMenu is not defined');
+            }
+          }}
+          color="inherit"
+        >
           <MenuIcon />
         </IconButton>
 
         {/* אמצע – תפקיד ושעה */}
         <Box textAlign="center">
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-            {role === 'manager' ? 'מנהלת' : 'עובד'}
-          </Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+  {role === 'manager' ? '🟢 מנהלת חדשה' : '🟢 עובד חדש'}
+</Typography>
+
           <Typography sx={{ fontSize: '1rem' }}>{timeStr}</Typography>
         </Box>
 
         {/* צד שמאל – שם וכפתור יציאה */}
         <Box display="flex" alignItems="center" gap={1}>
-    <Typography sx={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
-    {fullName || 'משתמש'}
-    </Typography>
-    <IconButton onClick={handleLogout} color="inherit">
-    <LogoutIcon />
-    </IconButton>
-      </Box>
+          <Typography sx={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+            {fullName || 'משתמש'}
+          </Typography>
+          <IconButton onClick={handleLogout} color="inherit">
+            <LogoutIcon />
+          </IconButton>
+        </Box>
       </Toolbar>
 
-      {/* Toast Container */}
       <ToastContainer />
     </AppBar>
   );

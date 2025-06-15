@@ -1,8 +1,8 @@
+// src/components/UserList.jsx
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { updateDoc } from 'firebase/firestore'; 
 import {
   Table,
   TableBody,
@@ -19,7 +19,6 @@ import {
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import Navbar from '../components/Navbar';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -45,21 +44,18 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
+  const handleDelete = async (userId) => {
+    const confirmed = window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש?');
+    if (!confirmed) return;
 
-const handleDelete = async (userId) => {
-  const confirmed = window.confirm('האם אתה בטוח שברצונך למחוק את המשתמש?');
-  if (!confirmed) return;
-
-  try {
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, { deleted: true });
-
-    setUsers(prev => prev.filter(user => user.id !== userId));
-  } catch (error) {
-    console.error('שגיאה בסימון המשתמש כמחוק:', error);
-  }
-};
-
+    try {
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, { deleted: true });
+      setUsers(prev => prev.filter(user => user.id !== userId));
+    } catch (error) {
+      console.error('שגיאה בסימון המשתמש כמחוק:', error);
+    }
+  };
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -71,21 +67,20 @@ const handleDelete = async (userId) => {
   };
 
   const filteredUsers = users
-  .filter(user =>
-    !user.deleted &&  
-    user.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-  .sort((a, b) => {
-    const dir = sortDir === 'asc' ? 1 : -1;
-    if (sortBy === 'fullName') {
-      return a.fullName.localeCompare(b.fullName) * dir;
-    } else if (sortBy === 'role') {
-      const roleValue = r => (r === 'manager' ? 0 : 1);
-      return (roleValue(a.role) - roleValue(b.role)) * dir;
-    }
-    return 0;
-  });
-
+    .filter(user =>
+      !user.deleted &&
+      user.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      if (sortBy === 'fullName') {
+        return a.fullName.localeCompare(b.fullName) * dir;
+      } else if (sortBy === 'role') {
+        const roleValue = r => (r === 'manager' ? 0 : 1);
+        return (roleValue(a.role) - roleValue(b.role)) * dir;
+      }
+      return 0;
+    });
 
   const renderSortIcon = (column) => {
     if (sortBy === column) {
@@ -95,172 +90,146 @@ const handleDelete = async (userId) => {
   };
 
   return (
-    <>
-      <Navbar />
-      <Box
+    <Box
+      sx={{
+        height: 'calc(100vh - 80px)',
+        width: '100vw',
+        background: 'linear-gradient(#fffbe9, #fff5d1)',
+        padding: '2rem',
+        paddingTop: '1rem',
+        fontFamily: 'Arial, sans-serif',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
         sx={{
-          height: 'calc(100vh - 80px)',
-          width: '100vw',
-          background: 'linear-gradient(#fffbe9, #fff5d1)',
-          padding: '2rem',
-          paddingTop: '1rem',
-          fontFamily: 'Arial, sans-serif',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
+          textAlign: 'center',
+          color: '#6d4c41',
+          marginBottom: '1rem',
+          fontWeight: 'bold',
+          fontSize: '2rem'
         }}
       >
-        <Typography
-          variant="h4"
-          gutterBottom
+        רשימת משתמשים
+      </Typography>
+
+      <Box display="flex" justifyContent="center" alignItems="center" gap="1rem" mb={2}>
+        <Button
+          variant="contained"
+          onClick={() => navigate('/users/new')}
           sx={{
-            textAlign: 'center',
-            color: '#6d4c41',
-            marginBottom: '1rem',
+            backgroundColor: '#a67c52',
+            '&:hover': { backgroundColor: '#8b5e3c' },
             fontWeight: 'bold',
-            fontSize: '2rem'
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            borderRadius: '8px'
           }}
         >
-          רשימת משתמשים
-        </Typography>
-
-        <Box
-  display="flex"
-  justifyContent="center"
-  alignItems="center"
-  gap="1rem"
-  mb={2}
->
-
-  <Button
-    variant="contained"
-    onClick={() => navigate('/users/new')}
-    sx={{
-      backgroundColor: '#a67c52',
-      '&:hover': { backgroundColor: '#8b5e3c' },
-      fontWeight: 'bold',
-      color: 'white',
-      padding: '0.75rem 1.5rem',
-      fontSize: '1rem',
-      borderRadius: '8px'
-    }}
-  >
-    הוסף משתמש
-  </Button>
-  <TextField
-    dir="rtl"
-    placeholder="חפש לפי שם"
-    variant="outlined"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    sx={{
-      backgroundColor: 'white',
-      minWidth: '250px',
-      '& .MuiOutlinedInput-root': {
-        '& fieldset': { borderColor: '#a67c52' },
-        '&:hover fieldset': { borderColor: '#8b5e3c' },
-        '&.Mui-focused fieldset': { borderColor: '#8b5e3c' },
-      },
-      input: {
-        color: '#6d4c41',
-        direction: 'rtl'
-      }
-    }}
-  />
-</Box>
-
-            
-
-        <Box
+          הוסף משתמש
+        </Button>
+        <TextField
+          dir="rtl"
+          placeholder="חפש לפי שם"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           sx={{
-            flex: 1,
-            width: '100%',
-            maxWidth: '1000px',
-            overflowY: 'scroll',
-            borderRadius: '16px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            backgroundColor: '#fff',
-
-            // עיצוב פס גלילה
-            '&::-webkit-scrollbar': {
-              width: '8px',
+            backgroundColor: 'white',
+            minWidth: '250px',
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: '#a67c52' },
+              '&:hover fieldset': { borderColor: '#8b5e3c' },
+              '&.Mui-focused fieldset': { borderColor: '#8b5e3c' },
             },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#c0a98f',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              backgroundColor: '#a67c52',
+            input: {
+              color: '#6d4c41',
+              direction: 'rtl'
             }
           }}
-        >
-          <TableContainer>
-            <Table dir="rtl" sx={{ minWidth: 700 }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#e0c097" }}>
-                  <TableCell
-                    align="right"
-                    sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}
-                    onClick={() => handleSort('fullName')}
-                  >
-                    שם מלא {renderSortIcon('fullName')}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          width: '100%',
+          maxWidth: '1000px',
+          overflowY: 'scroll',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          backgroundColor: '#fff',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#c0a98f',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: '#a67c52',
+          }
+        }}
+      >
+        <TableContainer>
+          <Table dir="rtl" sx={{ minWidth: 700 }}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#e0c097" }}>
+                <TableCell align="right" onClick={() => handleSort('fullName')}
+                  sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>
+                  שם מלא {renderSortIcon('fullName')}
+                </TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  אימייל
+                </TableCell>
+                <TableCell align="right" onClick={() => handleSort('role')}
+                  sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}>
+                  תפקיד {renderSortIcon('role')}
+                </TableCell>
+                <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  מחיקה
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredUsers.map(user => (
+                <TableRow key={user.id} sx={{ '&:hover': { backgroundColor: '#fcefd6' } }}>
+                  <TableCell align="right">{user.fullName}</TableCell>
+                  <TableCell align="right">{user.email}</TableCell>
+                  <TableCell align="right" sx={{ color: user.role === 'manager' ? '#6d4c41' : '#a67c52' }}>
+                    {user.role}
                   </TableCell>
-                  <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>
-                    אימייל
-                  </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer' }}
-                    onClick={() => handleSort('role')}
-                  >
-                    תפקיד {renderSortIcon('role')}
-                  </TableCell>
-                  <TableCell align="right" sx={{ color: "#6d4c41", fontWeight: 'bold', fontSize: '1.1rem' }}>
-                    מחיקה
+                  <TableCell align="right">
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#a67c52',
+                        '&:hover': { backgroundColor: '#8b5e3c' },
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => handleDelete(user.id)}
+                    >
+                      🗑️ מחק
+                    </Button>
                   </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredUsers.map(user => (
-                  <TableRow key={user.id} sx={{ '&:hover': { backgroundColor: '#fcefd6' } }}>
-                    <TableCell align="right">{user.fullName}</TableCell>
-                    <TableCell align="right">{user.email}</TableCell>
-                    <TableCell
-                      align="right"
-                      sx={{ color: user.role === 'manager' ? '#6d4c41' : '#a67c52' }}
-                    >
-                      {user.role}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Button
-                        variant="contained"
-                        sx={{
-                          backgroundColor: '#a67c52',
-                          '&:hover': { backgroundColor: '#8b5e3c' },
-                          color: 'white',
-                          fontWeight: 'bold'
-                        }}
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        🗑️ מחק
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-
-        <Box mt={2}>
-        </Box>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
-    </>
+    </Box>
   );
 };
 
