@@ -9,6 +9,7 @@ import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import LockIcon from '@mui/icons-material/Lock';
 
 function stringToColor(string) {
   let hash = 0;
@@ -85,12 +86,11 @@ export default function Navbar({ onToggleMenu }) {
       }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {/* ☰ תפריט צד + 🏠 לוגו */}
         <Box display="flex" alignItems="center">
           <IconButton onClick={() => typeof onToggleMenu === 'function' && onToggleMenu()} color="inherit">
             <MenuIcon />
           </IconButton>
-          <IconButton onClick={() => navigate('/')} color="inherit">
+          <IconButton onClick={() => navigate('/dashboard')} color="inherit">
             <HomeIcon />
           </IconButton>
         </Box>
@@ -108,6 +108,12 @@ export default function Navbar({ onToggleMenu }) {
           </Tooltip>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
             <MenuItem disabled>{fullName || 'משתמש'}</MenuItem>
+            <MenuItem onClick={() => {
+              handleMenuClose();
+              navigate('/change-password'); 
+            }}>
+              <LockIcon fontSize="small" style={{ marginLeft: 8 }} /> החלפת סיסמה
+            </MenuItem>
             <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }}>
               <LogoutIcon fontSize="small" style={{ marginLeft: 8 }} /> התנתק
             </MenuItem>
@@ -115,7 +121,7 @@ export default function Navbar({ onToggleMenu }) {
         </Box>
       </Toolbar>
       <Box sx={{
-        height: '3px',
+        height: '5px',
         width: '100vw',
         background: 'linear-gradient(270deg,rgba(255, 217, 0, 0.64),rgba(244, 226, 133, 0.7),rgba(255, 217, 0, 0.87))',
         backgroundSize: '200% 200%',

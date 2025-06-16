@@ -15,6 +15,7 @@ import BridePreparationPage from './pages/BridePreparationPage';
 import TheBrideCard from './components/TheBrideCard';
 import Layout from './components/Layout';
 import ManagerDashboard from './components/ManagerDashboard';
+import ChangePassword from './pages/ChangePassword';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/brides/preparation" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
           <Route path="/preparation-form" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Route>
       </Routes>
     </Router>
