@@ -1,4 +1,3 @@
-// src/components/ManagerDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -59,19 +58,11 @@ export default function ManagerDashboard() {
 
   return (
     <div className="manager-dashboard" dir="rtl">
-      <div className="dashboard-content">
-        <Typography variant="h4" gutterBottom>
-          שלום {fullName || 'משתמש'} 👋
-        </Typography>
+      <Typography variant="h4" className="greeting">
+        שלום {fullName || 'משתמש'} 👋
+      </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ marginBottom: '1rem', fontWeight: 'bold' }}
-        >
-          הפגישות שלי
-        </Button>
-
+      <div className="content-box">
         <Box display="flex" gap={2} mb={2}>
           <TextField
             placeholder="חפש לפי שם או כותרת"
@@ -97,7 +88,7 @@ export default function ManagerDashboard() {
           <Typography variant="h6" gutterBottom>פגישות</Typography>
           <List>
             {filteredAppointments.map(app => (
-              <ListItem key={app.id} sx={{ backgroundColor: '#fdf6ec', borderRadius: '8px', mb: 1 }}>
+              <ListItem key={app.id}>
                 <ListItemText
                   primary={`${new Date(app.date).toLocaleDateString()} - ${app.time || ''}`}
                   secondary={`${app.name || 'לא ידוע'} - ${app.title || ''}`}
@@ -106,6 +97,7 @@ export default function ManagerDashboard() {
             ))}
           </List>
         </Box>
+
       </div>
     </div>
   );

@@ -1,15 +1,78 @@
 .manager-dashboard {
   direction: rtl;
   font-family: 'Varela Round', sans-serif;
-  height: 100vh;
-  background: linear-gradient(#fffbe9, #fff5d1); 
+  min-height: 100vh;
+  background-image: url('/floral.jpeg');
+  background-repeat: repeat;
+  background-size: 300px;
+  background-position: center;
   display: flex;
   flex-direction: column;
-  position: relative;
+  align-items: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
   color: #333;
 }
 
-/* רקע כהה */
+/* Greeting at top */
+.greeting {
+  margin-bottom: 2rem;
+  font-weight: bold;
+  font-size: 1.8rem;
+  color: #2c2c2c;
+  text-align: center;
+}
+
+/* Main content box */
+.content-box {
+  background: linear-gradient(#fffefb, #fff8e6);
+  border-radius: 24px;
+  border: 2px solid #d4af37; /* classic gold */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  max-width: 850px;
+  width: 100%;
+  padding: 2.5rem;
+  text-align: center;
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  }
+}
+
+
+/* Meeting list inside content box */
+.meeting-list {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.meeting-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meeting-list li {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  color: #444;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar overlay */
 .sidebar-overlay {
   position: fixed;
   top: 0;
@@ -20,7 +83,7 @@
   z-index: 999;
 }
 
-/* סרגל צד */
+/* Sidebar */
 .sidebar {
   position: fixed;
   top: 0;
@@ -67,7 +130,7 @@
   margin-left: 0.5rem;
 }
 
-/* כפתור ✖ לסגירה */
+/* Close button */
 .close-btn {
   position: absolute;
   top: 1rem;
@@ -84,7 +147,7 @@
   color: #ffebc3;
 }
 
-/* תוכן ראשי */
+/* Optional content overrides */
 .dashboard-content {
   margin: auto;
   padding: 2rem;
@@ -108,30 +171,7 @@
   color: #333;
 }
 
-/* רשימת פגישות */
-.meeting-list {
-  max-width: 600px;
-  margin: 0 auto;
-  text-align: right;
-}
-
-.meeting-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.meeting-list li {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
-  color: #444;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* רספונסיביות */
+/* Responsive */
 @media (max-width: 600px) {
   .sidebar {
     width: 220px;
@@ -148,5 +188,14 @@
 
   .dashboard-content {
     padding: 1rem;
+  }
+
+  .content-box {
+    padding: 1.5rem;
+    min-height: auto;
+  }
+
+  .greeting {
+    font-size: 1.5rem;
   }
 }
