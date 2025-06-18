@@ -18,6 +18,7 @@ import ManagerDashboard from './components/ManagerDashboard';
 import ChangePassword from './pages/ChangePassword';
 import MeasurementFormPage from './pages/MeasurementFormPage';
 import BrideMeasurementForm from './pages/BrideMeasurementForm';
+import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/bride-preparation/:brideId" element={<BridePreparationPage />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="/measurements/:brideId" element={<ProtectedRoute><MeasurementFormPage /></ProtectedRoute>} />
         </Route>
       </Routes>
