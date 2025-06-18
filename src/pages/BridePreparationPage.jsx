@@ -1,122 +1,208 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🔄 ניווט
-import './BridePreparationPage.css'; // 🎨 עיצוב
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Button
+} from '@mui/material';
 
 const BridePreparationPage = () => {
-  const navigate = useNavigate(); // ⬅️ הגדרת ניווט
+  const { brideId } = useParams();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    makeupSet: false,
+    makeupConfirmed: false,
     makeupName: '',
-    hairSet: false,
+    hairStylingConfirmed: false,
     hairName: '',
-    breakfast: false,
-    salonClean: false,
+    breakfastOrdered: false,
+    salonCleaningConfirmed: false,
+    notes: ''
   });
+
+  const [brideName, setBrideName] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const brideSnap = await getDoc(doc(db, 'Brides', brideId));
+        if (brideSnap.exists()) {
+          setBrideName(brideSnap.data().fullName || '');
+        }
+
+        const formSnap = await getDoc(doc(db, 'PreparationForms', brideId));
+        if (formSnap.exists()) {
+          setFormData(formSnap.data());
+        }
+      } catch (err) {
+        console.error('שגיאה בטעינה:', err);
+      }
+    };
+    fetchData();
+  }, [brideId]);
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // כאן תוכל לשלב שמירה ל-Firestore
-    console.log("📝 נתונים שנשלחו:", formData);
-    alert("הטופס נשמר בהצלחה!");
+    try {
+      await setDoc(doc(db, 'PreparationForms', brideId), formData, { merge: true });
+      alert('הטופס נשמר בהצלחה!');
+    } catch (err) {
+      console.error('שגיאה בשמירה:', err);
+      alert('אירעה שגיאה');
+    }
   };
 
   return (
-    <div className="bride-prep-container">
-      <h2 className="bride-prep-title">טופס התארגנות לכלה: רות כהן</h2>
+    <Box dir="rtl" sx={{ p: 4, background: 'linear-gradient(to bottom, #f4e9ff, #ffffff)', minHeight: '100vh', fontFamily: 'Heebo, sans-serif' }}>
+      <Paper elevation={4} sx={{ maxWidth: 750, mx: 'auto', p: 5, borderRadius: 5, background: '#fffdfd' }}>
+        <Typography variant="h4" align="center" gutterBottom sx={{ color: '#7a3e9d' }}>
+          טופס התארגנות לכלה: {brideName}
+        </Typography>
+        <Divider sx={{ mb: 4 }} />
 
-      <form onSubmit={handleSubmit} className="bride-prep-form">
-        {/* מאפרת */}
-        <div className="bride-prep-section">
-          <label>
-            <input
-              type="checkbox"
-              name="makeupSet"
-              checked={formData.makeupSet}
-              onChange={handleChange}
-            />
-            מאפרת נקבעה
-          </label>
-          {formData.makeupSet && (
-            <input
-              type="text"
+        <form onSubmit={handleSubmit}>
+          {/* מאפרת */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.makeupConfirmed}
+                onChange={handleChange}
+                name="makeupConfirmed"
+                sx={{ color: '#8e44ad' }}
+              />
+            }
+            label="מאפרת נקבעה"
+            sx={{ mb: 2 }}
+          />
+          {formData.makeupConfirmed && (
+            <TextField
+              fullWidth
+              margin="dense"
+              label="שם המאפרת"
               name="makeupName"
               value={formData.makeupName}
               onChange={handleChange}
-              placeholder="שם המאפרת"
-              className="bride-prep-input"
+              InputLabelProps={{ shrink: true }}
+              sx={{ mb: 3 }}
             />
           )}
-        </div>
 
-        {/* מעצבת שיער */}
-        <div className="bride-prep-section">
-          <label>
-            <input
-              type="checkbox"
-              name="hairSet"
-              checked={formData.hairSet}
-              onChange={handleChange}
-            />
-            מעצבת שיער נקבעה
-          </label>
-          {formData.hairSet && (
-            <input
-              type="text"
+          {/* מעצבת שיער */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.hairStylingConfirmed}
+                onChange={handleChange}
+                name="hairStylingConfirmed"
+                sx={{ color: '#8e44ad' }}
+              />
+            }
+            label="מעצבת שיער נקבעה"
+            sx={{ mb: 2 }}
+          />
+          {formData.hairStylingConfirmed && (
+            <TextField
+              fullWidth
+              margin="dense"
+              label="שם מעצבת השיער"
               name="hairName"
               value={formData.hairName}
               onChange={handleChange}
-              placeholder="שם מעצבת השיער"
-              className="bride-prep-input"
+              InputLabelProps={{ shrink: true }}
+              sx={{ mb: 3 }}
             />
           )}
-        </div>
 
-        {/* ארוחת בוקר */}
-        <div className="bride-prep-section">
-          <label>
-            <input
-              type="checkbox"
-              name="breakfast"
-              checked={formData.breakfast}
-              onChange={handleChange}
-            />
-            ארוחת בוקר תואמה
-          </label>
-        </div>
+          {/* ארוחת בוקר */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.breakfastOrdered}
+                onChange={handleChange}
+                name="breakfastOrdered"
+                sx={{ color: '#8e44ad' }}
+              />
+            }
+            label="ארוחת בוקר תואמה"
+            sx={{ mb: 2 }}
+          />
 
-        {/* סלון נקי */}
-        <div className="bride-prep-section">
-          <label>
-            <input
-              type="checkbox"
-              name="salonClean"
-              checked={formData.salonClean}
-              onChange={handleChange}
-            />
-            הסלון נקי ליום ההגעה
-          </label>
-        </div>
+          {/* סלון נקי */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.salonCleaningConfirmed}
+                onChange={handleChange}
+                name="salonCleaningConfirmed"
+                sx={{ color: '#8e44ad' }}
+              />
+            }
+            label="הסלון נקי ליום ההגעה"
+            sx={{ mb: 3 }}
+          />
 
-        {/* כפתורי שליחה וחזרה */}
-        <button type="submit">שמור</button>
-        <button
-          type="button"
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
-          חזרה לדשבורד
-        </button>
-      </form>
-    </div>
+          {/* הערות */}
+          <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>
+            הערות נוספות:
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
+            placeholder="כאן ניתן להוסיף הערות כלליות..."
+            sx={{ mb: 4 }}
+          />
+
+          {/* כפתורים */}
+          <Box display="flex" justifyContent="center" gap={3}>
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                backgroundColor: '#8e44ad',
+                color: 'white',
+                fontSize: '1.1rem',
+                px: 4,
+                '&:hover': { backgroundColor: '#6c3483' }
+              }}
+            >
+              שמירה
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/brides/${brideId}`)}
+              sx={{
+                fontSize: '1.1rem',
+                px: 4,
+                borderColor: '#8e44ad',
+                color: '#8e44ad',
+                '&:hover': { backgroundColor: '#f2e6ff' }
+              }}
+            >
+              חזרה
+            </Button>
+          </Box>
+        </form>
+      </Paper>
+    </Box>
   );
 };
 

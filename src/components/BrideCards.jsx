@@ -5,7 +5,7 @@ import {
   TextField, Checkbox, IconButton, Box
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { collection, getDocs, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, deleteDoc, getDocs as getSubDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,6 +43,15 @@ const BrideCards = () => {
     }
   };
 
+  const deleteSubcollections = async (brideId) => {
+    const subcollections = ['appointments', 'measurements', 'preparationForm'];
+    await Promise.all(subcollections.map(async (subCol) => {
+      const subColRef = collection(db, `Brides/${brideId}/${subCol}`);
+      const subDocsSnap = await getSubDocs(subColRef);
+      await Promise.all(subDocsSnap.docs.map(docSnap => deleteDoc(docSnap.ref)));
+    }));
+  };
+
   const handleAddBride = async () => {
     try {
       const newBride = {
@@ -57,12 +66,7 @@ const BrideCards = () => {
 
       const docRef = await addDoc(collection(db, 'Brides'), newBride);
 
-      const subCollections = ['payments', 'appointments', 'measurements'];
-      await Promise.all(
-        subCollections.map(col =>
-          setDoc(doc(db, `Brides/${docRef.id}/${col}/init`), { created: true })
-        )
-      );
+      await setDoc(doc(db, `Brides/${docRef.id}/appointments/init`), { created: true });
 
       await setDoc(doc(db, `Brides/${docRef.id}/preparationForm/form`), {
         makeupConfirmed: false,
@@ -71,6 +75,28 @@ const BrideCards = () => {
         salonCleaningConfirmed: false,
         notes: '',
         created: true
+      });
+
+      await setDoc(doc(db, `Brides/${docRef.id}/measurements/${docRef.id}`), {
+        brideName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        weddingDate: formData.weddingDate ? new Date(formData.weddingDate) : null,
+        seamstressName: formData.assignedSeamstress,
+        measurementDate: null,
+        measurementNumber: 1,
+        bust: null,
+        waist: null,
+        hips: null,
+        dressLength: null,
+        sleeveLength: null,
+        shoulderWidth: null,
+        armCircumference: null,
+        depositPaid: 0,
+        depositCheck: false,
+        fixCost: 0,
+        fixDescription: '',
+        finalPaymentCompleted: false
       });
 
       setBrides(prev => [...prev, { id: docRef.id, ...newBride }]);
@@ -95,6 +121,7 @@ const BrideCards = () => {
 
   const handleDeleteBride = async (id) => {
     try {
+      await deleteSubcollections(id);
       await deleteDoc(doc(db, 'Brides', id));
       setBrides(prev => prev.filter(bride => bride.id !== id));
     } catch (error) {
@@ -104,119 +131,130 @@ const BrideCards = () => {
 
   const handleDeleteSelected = async () => {
     try {
-      await Promise.all(selectedBrides.map(id => deleteDoc(doc(db, 'Brides', id))));
+      await Promise.all(selectedBrides.map(async (id) => {
+        await deleteSubcollections(id);
+        await deleteDoc(doc(db, 'Brides', id));
+      }));
       setBrides(prev => prev.filter(bride => !selectedBrides.includes(bride.id)));
       setSelectedBrides([]);
     } catch (error) {
       console.error('שגיאה במחיקת כלות נבחרות:', error);
     }
   };
-
+  
   const filteredBrides = brides.filter(bride =>
     bride.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterPayment === '' || (filterPayment === 'paid' && bride.paymentStatus === true) || (filterPayment === 'unpaid' && bride.paymentStatus === false)) &&
     (filterHistory === '' || bride.historyStatus === filterHistory)
   );
 
-  return (
+return (
+  <div style={{
+    height: '100vh',
+    width: '100vw',
+    overflow: 'hidden',
+    background: 'linear-gradient(#fffbe9, #fff5d1)',
+    padding: '2rem',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    <h2 style={{ textAlign: 'center', color: '#6d4c41', marginBottom: '2rem', fontSize: '2rem' }}>רשימת כלות</h2>
+
+    {/* חיפוש */}
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+      <button onClick={() => setSearchTerm(searchTerm.trim())}
+        style={{
+          backgroundColor: '#a67c52', color: 'white', fontWeight: 'bold',
+          border: 'none', borderRadius: '8px', padding: '0.75rem 1.25rem', fontSize: '1rem', cursor: 'pointer'
+        }}>
+        חפש
+      </button>
+      <input type="text" placeholder="חפש לפי שם כלה" value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)} dir="rtl"
+        style={{
+          backgroundColor: 'white', color: '#6d4c41',
+          padding: '0.75rem', fontSize: '1rem',
+          border: '2px solid #a67c52', borderRadius: '8px', minWidth: '200px'
+        }} />
+    </div>
+
+    {/* סינון */}
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+      <select value={filterPayment} onChange={(e) => setFilterPayment(e.target.value)}
+        style={{
+          backgroundColor: '#6d4c41', padding: '0.75rem',
+          fontSize: '1rem', borderRadius: '8px', border: '2px solid #a67c52'
+        }}>
+        <option value="">סטטוס תשלום</option>
+        <option value="paid">שילמו</option>
+        <option value="unpaid">לא שילמו</option>
+      </select>
+      <select value={filterHistory} onChange={(e) => setFilterHistory(e.target.value)}
+        style={{
+          backgroundColor: '#6d4c41', padding: '0.75rem',
+          fontSize: '1rem', borderRadius: '8px', border: '2px solid #a67c52'
+        }}>
+        <option value="">סטטוס כלה</option>
+        <option value="In Progress">בתהליך</option>
+        <option value="Completed">סיימו</option>
+      </select>
+    </div>
+
+   {/* כפתורי פעולה */}
+<Box sx={{ maxWidth: '1000px', width: '100%', margin: '0 auto 1rem auto' }}>
+  {/* כפתור הוספה - ממורכז */}
+  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+    <Button
+      variant="contained"
+      onClick={() => setOpenDialog(true)}
+      sx={{
+        backgroundColor: '#6d4c41',
+        '&:hover': { backgroundColor: '#4e342e' },
+        fontWeight: 'bold',
+        color: 'white',
+        fontSize: '1rem',
+        borderRadius: '8px',
+        padding: '0.75rem 1.5rem'
+      }}
+    >
+      ➕ הוספת כלה
+    </Button>
+  </Box>
+
+  {/* כפתור מחיקה - יישור לימין מוחלט */}
+  {selectedBrides.length > 0 && (
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Button
+        variant="outlined"
+        color="error"
+        size="small"
+        onClick={handleDeleteSelected}
+        sx={{
+          fontWeight: 'bold',
+          px: 1.5,
+          py: 0.5,
+          fontSize: '0.875rem'
+        }}
+      >
+        🗑️ מחיקת כלות נבחרות
+      </Button>
+    </Box>
+  )}
+</Box>
+
+
+    {/* סיכום כמות כלות */}
     <div style={{
-  height: '100vh',             // קובע גובה קבוע לעמוד
-  width: '100vw',
-  overflow: 'hidden',          // מונע scroll של הדף
-  background: 'linear-gradient(#fffbe9, #fff5d1)',
-  padding: '2rem',
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column'
-}}>
-      <h2 style={{ textAlign: 'center', color: '#6d4c41', marginBottom: '2rem', fontSize: '2rem' }}>רשימת כלות</h2>
-
-      {/* חיפוש */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <button onClick={() => setSearchTerm(searchTerm.trim())}
-          style={{
-            backgroundColor: '#a67c52', color: 'white', fontWeight: 'bold',
-            border: 'none', borderRadius: '8px', padding: '0.75rem 1.25rem', fontSize: '1rem', cursor: 'pointer'
-          }}>
-          חפש
-        </button>
-        <input type="text" placeholder="חפש לפי שם כלה" value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} dir="rtl"
-          style={{
-            backgroundColor: 'white', color: '#6d4c41',
-            padding: '0.75rem', fontSize: '1rem',
-            border: '2px solid #a67c52', borderRadius: '8px', minWidth: '200px'
-          }} />
-      </div>
-
-      {/* סינון */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        <select value={filterPayment} onChange={(e) => setFilterPayment(e.target.value)}
-          style={{
-            backgroundColor: '#6d4c41', padding: '0.75rem',
-            fontSize: '1rem', borderRadius: '8px', border: '2px solid #a67c52'
-          }}>
-          <option value="">סטטוס תשלום</option>
-          <option value="paid">שילמו</option>
-          <option value="unpaid">לא שילמו</option>
-        </select>
-        <select value={filterHistory} onChange={(e) => setFilterHistory(e.target.value)}
-          style={{
-            backgroundColor: '#6d4c41', padding: '0.75rem',
-            fontSize: '1rem', borderRadius: '8px', border: '2px solid #a67c52'
-          }}>
-          <option value="">סטטוס כלה</option>
-          <option value="In Progress">בתהליך</option>
-          <option value="Completed">סיימו</option>
-        </select>
-      </div>
-
-      {/* כפתורים מעל הטבלה */}
-      <div style={{ position: 'relative', maxWidth: '1000px', margin: '0 auto 2rem auto', height: '60px' }}>
-        {selectedBrides.length > 0 && (
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleDeleteSelected}
-            sx={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              fontWeight: 'bold'
-            }}
-          >
-            🗑️ מחיקת כלות נבחרות
-          </Button>
-        )}
-        <div style={{ textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            onClick={() => setOpenDialog(true)}
-            sx={{
-              backgroundColor: '#6d4c41',
-              '&:hover': { backgroundColor: '#4e342e' },
-              fontWeight: 'bold',
-              color: 'white',
-              fontSize: '1rem',
-              borderRadius: '8px',
-              padding: '0.75rem 1.5rem'
-            }}
-          >
-            ➕ הוספת כלה
-          </Button>
-        </div>
-      </div>
-
-      <div style={{
-        textAlign: 'right',
-        fontSize: '0.9rem',
-        color: '#6d4c41',
-        margin: '0 auto 0.25rem auto',
-        maxWidth: '1000px',
-        paddingInline: '1rem'
-      }}>
-        מספר כלות: {filteredBrides.length}
-      </div>
+      textAlign: 'right',
+      fontSize: '0.9rem',
+      color: '#6d4c41',
+      margin: '0 auto 0.25rem auto',
+      maxWidth: '1000px',
+      paddingInline: '1rem'
+    }}>
+      מספר כלות: {filteredBrides.length}
+    </div>
 
       {/* טבלה בתוך Box עם scrollbar מעוצב */}
       <Box

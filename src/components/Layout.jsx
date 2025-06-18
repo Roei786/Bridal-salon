@@ -16,13 +16,9 @@ const Layout = () => {
   const buttons = [
     { label: 'ניהול משתמשים', icon: '👤', path: '/users' },
     { label: 'כרטיסיות כלות', icon: '👰', path: '/brides' },
-    { label: 'טופס התארגנות', icon: '📝', path: '/preparation-form' },
     { label: 'יומן פגישות', icon: '📅', path: '/calendar' },
-    { label: 'היסטוריית כלות', icon: '📖', path: '/bride-history' },
     { label: 'כניסה/יציאה', icon: '🔐', path: '/attendance' },
     { label: 'הפקת דוחות', icon: '📊', path: '/reports' },
-    { label: 'שליחת טופס מדידה', icon: '✉️', path: '/send-measurement' },
-    { label: 'שלח תזכורת', icon: '📨', path: '/send-reminder' },
   ];
 
   return (

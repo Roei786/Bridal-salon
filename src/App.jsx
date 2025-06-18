@@ -16,17 +16,21 @@ import TheBrideCard from './components/TheBrideCard';
 import Layout from './components/Layout';
 import ManagerDashboard from './components/ManagerDashboard';
 import ChangePassword from './pages/ChangePassword';
+import MeasurementFormPage from './pages/MeasurementFormPage';
+import BrideMeasurementForm from './pages/BrideMeasurementForm';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* דפים בלי תפריט */}
+        {/* דפים ציבוריים ללא תפריט */}
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/bride-measurements/:brideId" element={<BrideMeasurementForm />} />
+        <Route path="/bride-preparation/:brideId" element={<BridePreparationPage />} />
 
-        {/* דפים עם Layout (כוללים Sidebar ו־Navbar) */}
+        {/* דפים עם Layout (תפריט וכו') */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute><AppointmentSchedule /></ProtectedRoute>} />
@@ -36,9 +40,9 @@ function App() {
           <Route path="/users/new" element={<ProtectedRoute><UserCreationForm /></ProtectedRoute>} />
           <Route path="/bride-history" element={<ProtectedRoute><BrideHistory /></ProtectedRoute>} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/brides/preparation" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
-          <Route path="/preparation-form" element={<ProtectedRoute><BridePreparationPage /></ProtectedRoute>} />
+          <Route path="/bride-preparation/:brideId" element={<BridePreparationPage />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/measurements/:brideId" element={<ProtectedRoute><MeasurementFormPage /></ProtectedRoute>} />
         </Route>
       </Routes>
     </Router>

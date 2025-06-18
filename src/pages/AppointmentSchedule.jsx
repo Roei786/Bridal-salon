@@ -20,10 +20,12 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  query,
+  where,
+  getDocs as getSubDocs
 } from 'firebase/firestore';
 import { db } from '../firebase';
-
 
 moment.locale('he');
 const localizer = momentLocalizer(moment);
@@ -31,138 +33,136 @@ const localizer = momentLocalizer(moment);
 const AppointmentSchedule = () => {
   const [appointments, setAppointments] = useState([]);
   const [brides, setBrides] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [open, setOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('week');
   const [formData, setFormData] = useState({
-    name: '', // This will hold bride.fullName
-    title: '', // Added for appointment title
+    name: '',
+    title: '',
     email: '',
     date: '',
     time: ''
   });
 
-  // Fetches appointments from Firebase and formats them for react-big-calendar
   const fetchAppointments = useCallback(async () => {
     const querySnapshot = await getDocs(collection(db, 'appointments'));
     const data = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
     setAppointments(data.map(app => ({
       ...app,
-      start: new Date(app.date + ' ' + app.time),
-      end: new Date(dayjs(app.date + ' ' + app.time).add(1, 'hour')),
+      start: new Date(`${app.date}T${app.time}`),
+      end: new Date(dayjs(`${app.date}T${app.time}`).add(1, 'hour').toISOString())
     })));
   }, []);
 
-  // Fetches brides from Firebase
   const fetchBrides = useCallback(async () => {
-    // IMPORTANT: Ensure 'Brides' matches your Firestore collection name exactly (case-sensitive)
     const snapshot = await getDocs(collection(db, 'Brides'));
     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setBrides(data);
   }, []);
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchAppointments();
     fetchBrides();
   }, [fetchAppointments, fetchBrides]);
 
-  // Handles clicking on an empty slot in the calendar to create a new appointment
   const handleSelectSlot = ({ start }) => {
-    setSelectedDate(start);
     setFormData({
-      name: '', // Initialize with empty bride selection
+      name: '',
       title: '',
       email: '',
-      date: dayjs(start).format('YYYY-MM-DD'), // Pre-fill date from selected slot
-      time: dayjs(start).format('HH:mm')      // Pre-fill time from selected slot (e.g., 00:00 or specific hour)
+      date: dayjs(start).format('YYYY-MM-DD'),
+      time: dayjs(start).format('HH:mm')
     });
-    setSelectedEvent(null); // Clear any previously selected event
-    setOpen(true); // Open the dialog
+    setSelectedEvent(null);
+    setOpen(true);
   };
 
-  // Handles clicking on an existing event in the calendar to edit it
   const handleSelectEvent = (event) => {
+    const bride = brides.find(b => b.fullName === event.name);
     setSelectedEvent(event);
-    // Try to find the bride object from the fetched brides list
-    // This helps ensure the email is consistent with the currently available bride data
-    const brideForEvent = brides.find(b => b.fullName === event.name);
-
     setFormData({
-      name: event.name, // The name stored in the appointment (should match a bride.fullName)
-      title: event.title || '', // Use existing title or empty string
-      // Use email from found bride, otherwise fall back to the event's stored email
-      email: brideForEvent ? brideForEvent.email : event.email,
-      date: dayjs(event.start).format('YYYY-MM-DD'), // Extract date from event start
-      time: dayjs(event.start).format('HH:mm')      // Extract time from event start
+      name: event.name,
+      title: event.title || '',
+      email: bride?.email || event.email,
+      date: dayjs(event.start).format('YYYY-MM-DD'),
+      time: dayjs(event.start).format('HH:mm')
     });
-    setOpen(true); // Open the dialog
+    setOpen(true);
   };
 
-  // Closes the appointment dialog
   const handleClose = () => {
     setOpen(false);
-    setSelectedEvent(null); // Clear selected event on close
+    setSelectedEvent(null);
   };
 
-  // Handles changes in form fields (for both text inputs and the select dropdown)
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'name') {
-      // If the 'name' (bride) field is changed, find the selected bride
-      const selectedBride = brides.find(b => b.fullName === value);
+      const bride = brides.find(b => b.fullName === value);
       setFormData(prev => ({
         ...prev,
-        name: value, // Update the selected bride's full name
-        email: selectedBride?.email || '' // Auto-fill email if bride found, otherwise clear
+        name: value,
+        email: bride?.email || ''
       }));
     } else {
-      // For other fields, update directly
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // Handles submitting the form (add new or update existing appointment)
   const handleSubmit = async () => {
     const { name, title, email, date, time } = formData;
-
-    // Basic client-side validation
     if (!name || !date || !time) {
       alert('יש למלא את כל השדות הנדרשים.');
       return;
     }
+    const bride = brides.find(b => b.fullName === name);
+    if (!bride) {
+      alert('הכלה לא נמצאה במערכת.');
+      return;
+    }
+
+    const newAppointment = { name, title, email, date, time };
 
     if (selectedEvent) {
-      // Update existing appointment
-      const ref = doc(db, 'appointments', selectedEvent.id);
-      await updateDoc(ref, { name, title, email, date, time });
+      await updateDoc(doc(db, 'appointments', selectedEvent.id), newAppointment);
     } else {
-      // Add new appointment
-      await addDoc(collection(db, 'appointments'), { name, title, email, date, time });
+      await addDoc(collection(db, 'appointments'), newAppointment);
+      await addDoc(collection(db, `Brides/${bride.id}/appointments`), newAppointment);
     }
-    fetchAppointments(); // Re-fetch appointments to update the calendar display
-    handleClose(); // Close the dialog
+
+    fetchAppointments();
+    handleClose();
   };
 
-  // Handles deleting an appointment
   const handleDelete = async () => {
     if (selectedEvent) {
       await deleteDoc(doc(db, 'appointments', selectedEvent.id));
-      fetchAppointments(); // Re-fetch appointments to update the calendar display
-      handleClose(); // Close the dialog
+
+      const bride = brides.find(b => b.fullName === selectedEvent.name);
+      if (bride) {
+        const subQuery = query(
+          collection(db, `Brides/${bride.id}/appointments`),
+          where('date', '==', selectedEvent.date),
+          where('time', '==', selectedEvent.time),
+          where('email', '==', selectedEvent.email || '')
+        );
+        const snapshot = await getSubDocs(subQuery);
+        snapshot.forEach(docSnap => deleteDoc(docSnap.ref));
+      }
+
+      fetchAppointments();
+      handleClose();
     }
   };
 
   return (
     <div className="appointment-schedule" dir="rtl">
       <div className="schedule-header">
-        <h2>יומן פגישות</h2> {/* Appointment Calendar heading */}
+        <h2>יומן פגישות</h2>
       </div>
       <div className="calendar-container">
         <Calendar
@@ -170,122 +170,107 @@ const AppointmentSchedule = () => {
           events={appointments}
           startAccessor="start"
           endAccessor="end"
-          // Custom title accessor to display time and bride name
-          titleAccessor={(event) => {
-            const displayTime = event.time ? event.time : '';
-            return `${displayTime} - ${event.name}`; // Example: "14:30 - Jane Doe"
-          }}
+          titleAccessor={(event) => `${event.time} - ${event.name}`}
           style={{ height: '75vh', minHeight: 650 }}
-          selectable // Allows selecting time slots
-          onSelectSlot={handleSelectSlot} // Handler for selecting empty slots
-          onSelectEvent={handleSelectEvent} // Handler for selecting existing events
-          views={['month', 'week', 'day']} // Available calendar views
-          defaultView="month" // Default view when calendar loads
-          culture="he" // Set calendar culture to Hebrew
+          selectable
+          view={currentView}
+          onView={setCurrentView}
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          views={['month', 'week', 'day']}
+          defaultView="week"
+          dayLayoutAlgorithm="no-overlap"
+          culture="he"
           messages={{
-            allDay: 'כל היום',       // "All Day" label for events
-            previous: 'הקודם',       // "Previous" navigation button
-            next: 'הבא',             // "Next" navigation button
-            today: 'נוכחי',         // "Current" navigation button
-            month: 'חודש',         // "Month" view button
-            week: 'שבוע',          // "Week" view button
-            day: 'יום',            // "Day" view button
-            agenda: 'סדר יום',      // "Agenda" view button (if enabled in 'views')
-            date: 'תאריך',         // Column header for date in Agenda view
-            time: 'שעה',           // Column header for time in Agenda view
-            event: 'אירוע',         // Column header for event in Agenda view
-            noEventsInRange: 'אין פגישות בטווח תאריכים זה.', // Message for no events
-            showMore: total => `+ ${total} עוד` // Text for "show more" events in month view
+            allDay: 'כל היום',
+            previous: 'הקודם',
+            next: 'הבא',
+            today: 'היום',
+            month: 'חודש',
+            week: 'שבוע',
+            day: 'יום',
+            agenda: 'סדר יום',
+            date: 'תאריך',
+            time: 'שעה',
+            event: 'אירוע',
+            noEventsInRange: 'אין פגישות בטווח תאריכים זה.',
+            showMore: total => `+ ${total} עוד`
           }}
         />
       </div>
 
-      {/* Appointment Dialog (for New or Edit) */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth dir="rtl">
-        <DialogTitle>{selectedEvent ? 'עריכת פגישה' : 'פגישה חדשה'}</DialogTitle> {/* Edit or New Appointment title */}
+        <DialogTitle>{selectedEvent ? 'עריכת פגישה' : 'פגישה חדשה'}</DialogTitle>
         <DialogContent>
-          {/* Bride Name Selection (Dropdown) */}
           <TextField
-            select // Makes it a select dropdown
+            select
             margin="dense"
-            label="שם הכלה" // Label: Bride Name
+            label="שם הכלה"
             name="name"
-            value={formData.name} // Binds to formData.name state
-            onChange={handleChange} // Calls handleChange on selection
+            value={formData.name}
+            onChange={handleChange}
             fullWidth
-            required // Mark as required
-            InputLabelProps={{ shrink: true }} // Helps prevent label overlap
+            required
+            InputLabelProps={{ shrink: true }}
           >
-            {/* Optional: Add a blank option for better UX */}
-            <MenuItem value="">
-              <em>בחר כלה...</em> {/* Select a bride... */}
-            </MenuItem>
-            {brides.map((bride) => (
+            <MenuItem value=""><em>בחר כלה...</em></MenuItem>
+            {brides.map(bride => (
               <MenuItem key={bride.id} value={bride.fullName}>
                 {bride.fullName}
               </MenuItem>
             ))}
           </TextField>
 
-          {/* Appointment Title Text Field */}
           <TextField
             margin="dense"
-            label="כותרת" // Label: Title
+            label="כותרת"
             name="title"
             value={formData.title}
             onChange={handleChange}
             fullWidth
             InputLabelProps={{ shrink: true }}
           />
-
-          {/* Email Text Field (can be auto-filled from bride selection) */}
           <TextField
             margin="dense"
-            label="אימייל" // Label: Email
+            label="אימייל"
             name="email"
             value={formData.email}
             onChange={handleChange}
             fullWidth
             InputLabelProps={{ shrink: true }}
-            // You can make this readOnly if it should always be tied to the selected bride:
-            // InputProps={{ readOnly: !!formData.name }}
           />
-
-          {/* Date Picker Field */}
           <TextField
             margin="dense"
-            label="תאריך" // Label: Date
+            label="תאריך"
             name="date"
-            type="date" // HTML5 date input type
+            type="date"
             value={formData.date}
             onChange={handleChange}
             fullWidth
-            required // Mark as required
-            InputLabelProps={{ shrink: true }} // Ensures label is always visible for date/time types
+            required
+            InputLabelProps={{ shrink: true }}
           />
-
-          {/* Time Picker Field */}
           <TextField
             margin="dense"
-            label="שעה" // Label: Time
+            label="שעה"
             name="time"
-            type="time" // HTML5 time input type
+            type="time"
             value={formData.time}
             onChange={handleChange}
             fullWidth
-            required // Mark as required
-            InputLabelProps={{ shrink: true }} // Ensures label is always visible for date/time types
+            required
+            InputLabelProps={{ shrink: true }}
           />
         </DialogContent>
         <DialogActions>
-          {selectedEvent && ( // Show delete button only if editing an existing event
+          {selectedEvent && (
             <Button onClick={handleDelete} color="error">
-              מחיקה {/* Delete */}
+              מחיקה
             </Button>
           )}
-          <Button onClick={handleClose}>ביטול</Button> {/* Cancel */}
+          <Button onClick={handleClose}>ביטול</Button>
           <Button onClick={handleSubmit} variant="contained">
-            {selectedEvent ? 'עדכון' : 'הוספה'} {/* Update or Add */}
+            {selectedEvent ? 'עדכון' : 'הוספה'}
           </Button>
         </DialogActions>
       </Dialog>
