@@ -32,6 +32,7 @@
     padding: 2.5rem;
     text-align: center;
     animation: glow 3s ease-in-out infinite;
+    margin-top: 5rem;
   }
   
   @keyframes glow {
@@ -174,21 +175,21 @@
   /* Meeting list inside content box */
 .meeting-list {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.75rem;
 }
 
 .meeting-list ul {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 1.75rem;
 }
 
 .meeting-list li {
   background-color: #f0e3bb;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
+  padding: 1.75rem 1rem;
+  margin-bottom: 1.75rem;
   color: #77664c;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
