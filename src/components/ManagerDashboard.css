@@ -1,6 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+.manager-dashboard * {
+  font-family: 'Roboto', sans-serif;
+}
 .manager-dashboard {
   direction: rtl;
-  font-family: 'Varela Round', sans-serif;
+  font-family: 'Roboto', sans-serif;
   min-height: 100vh;
   background-image: url('/floral.jpeg');
   background-repeat: repeat;
@@ -62,7 +67,7 @@
 }
 
 .meeting-list li {
-  background-color: #fff;
+  background-color: #f0e3bb;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0.75rem 1rem;
