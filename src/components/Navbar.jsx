@@ -68,14 +68,13 @@ export default function Navbar({ onToggleMenu }) {
         position="fixed"
         sx={{
           background: 'linear-gradient(-45deg, #c89ddc, #7e57c2, #a18cd1, #6a1b9a)',
+          backgroundSize: '400% 400%',
           animation: 'gradientMove 20s ease infinite',
+          color: '#fff',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+          zIndex: 1100,
           direction: 'rtl',
-          zIndex: 1300,
-          '@keyframes gradientMove': {
-            '0%': { backgroundPosition: '0% 50%' },
-            '50%': { backgroundPosition: '100% 50%' },
-            '100%': { backgroundPosition: '0% 50%' },
-          }
+          paddingX: 2
         }}
       >
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -108,8 +107,19 @@ export default function Navbar({ onToggleMenu }) {
             </Menu>
           </Box>
         </Toolbar>
-      </AppBar>
+        <Box sx={{
+        height: '5px',
+        width: '100vw',
+        background: 'linear-gradient(270deg,rgba(255, 217, 0, 0.64),rgba(244, 226, 133, 0.7),rgba(255, 217, 0, 0.87))',
+        backgroundSize: '200% 200%',
+        animation: 'shimmerBorder 4s linear infinite',
+        '@keyframes shimmerBorder': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '100% 50%' }
+        }
+      }} />
       <ToastContainer />
+      </AppBar>
     </>
   );
 }
