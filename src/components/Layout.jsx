@@ -1,15 +1,16 @@
 // src/components/Layout.jsx
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
-import './ManagerDashboard.css'; // סגנונות של sidebar
+import './ManagerDashboard.css';
 
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { fullName } = useAuth();
   const navigate = useNavigate();
 
   const toggleMenu = () => {
-    console.log('🔁 toggleMenu called');
     setIsSidebarOpen(prev => !prev);
   };
 
@@ -31,8 +32,12 @@ const Layout = () => {
 
       <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2>תפריט מנהלת</h2>
+          <div className="user-info">
+            <div className="user-avatar">{fullName?.[0] || '?'}</div>
+            <div className="user-name">{fullName || 'משתמש'}</div>
+          </div>
         </div>
+
         <ul className="sidebar-list">
           {buttons.map((btn, idx) => (
             <li key={idx} onClick={() => {
@@ -53,3 +58,7 @@ const Layout = () => {
 };
 
 export default Layout;
+
+
+
+
