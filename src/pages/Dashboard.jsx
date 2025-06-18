@@ -10,7 +10,7 @@ export default function Dashboard() {
   if (!role) return <p>טוען תפקיד...</p>;
 
   return (
-    <div className="dashboard-container" style={{ paddingTop: '80px' }}>
+    <div className="dashboard-container" style={{ paddingTop: '100px' }}>
       {role === 'manager' && <ManagerDashboard />}
       {role === 'employee' && <EmployeeDashboard />}
       {role !== 'manager' && role !== 'employee' && (
