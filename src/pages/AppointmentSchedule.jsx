@@ -35,7 +35,7 @@ const AppointmentSchedule = () => {
   const [brides, setBrides] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [open, setOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('week');
+  const [currentView, setCurrentView] = useState('month');
   const [formData, setFormData] = useState({
     name: '',
     title: '',
@@ -178,7 +178,7 @@ const AppointmentSchedule = () => {
           onSelectSlot={handleSelectSlot}
           onSelectEvent={handleSelectEvent}
           views={['month', 'week', 'day']}
-          defaultView="week"
+          defaultView="month"
           dayLayoutAlgorithm="no-overlap"
           culture="he"
           messages={{

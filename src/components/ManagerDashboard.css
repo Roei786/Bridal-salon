@@ -16,9 +16,9 @@
   
   .greeting {
     margin-bottom: 2rem;
-    font-weight: bold;
+    font-weight:bolder;
     font-size: 1.8rem;
-    color: #2c2c2c;
+    color: #77664c;
     text-align: center;
   }
   
@@ -32,6 +32,7 @@
     padding: 2.5rem;
     text-align: center;
     animation: glow 3s ease-in-out infinite;
+    margin-top: 5rem;
   }
   
   @keyframes glow {
@@ -171,6 +172,29 @@
   .dashboard-content .MuiTextField-root {
     color: #333;
   }
+  /* Meeting list inside content box */
+.meeting-list {
+  text-align: center;
+  margin-top: 1.75rem;
+}
+
+.meeting-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.75rem;
+}
+
+.meeting-list li {
+  background-color: #f0e3bb;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.75rem 1rem;
+  margin-bottom: 1.75rem;
+  color: #77664c;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
   
   @media (max-width: 600px) {
     .sidebar {

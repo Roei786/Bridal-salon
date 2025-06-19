@@ -69,7 +69,7 @@ export default function ManagerDashboard() {
       <div className="content-box">
         <Box display="flex" gap={2} mb={2}>
           <TextField
-            placeholder="חפש לפי שם או כותרת"
+            placeholder="חיפוש לפי שם או כותרת"
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
