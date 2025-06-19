@@ -33,14 +33,14 @@
   box-sizing: border-box;
 }
 
-
+/* Base calendar styling */
 .rbc-calendar {
   background-color: transparent;
   font-size: 16px;
   line-height: 1.5;
 }
 
-
+/* Toolbar */
 .rbc-toolbar {
   margin-bottom: 20px;
   font-size: 1.2rem;
@@ -67,7 +67,7 @@
   color: white;
 }
 
-/* Month view styling */
+/* --- MONTH VIEW --- */
 .rbc-month-view {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -80,8 +80,6 @@
   height: 100%;
 }
 
-
-/* Header row styling */
 .rbc-header {
   background-color: #f5f5f5;
   color: #6d4c41;
@@ -93,7 +91,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Date cell styling */
 .rbc-date-cell {
   padding: 12px 8px;
   min-height: 80px;
@@ -116,7 +113,6 @@
   color: white;
 }
 
-/* Today styling */
 .rbc-today {
   background-color: #fff8e1;
   border: 2px solid #BC8C61;
@@ -128,7 +124,6 @@
   border-radius: 50%;
 }
 
-/* Off-range dates */
 .rbc-off-range {
   color: #bbb;
 }
@@ -137,22 +132,61 @@
   background-color: #fafafa;
 }
 
-/* Event styling */
+/* --- WEEK & DAY VIEWS --- */
+.rbc-time-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.rbc-time-content {
+  display: flex;
+  flex: 1;
+  min-height: 600px;
+  border-top: 1px solid #e0e0e0;
+  overflow-y: auto;
+}
+
+.rbc-time-gutter {
+  width: 60px;
+  background-color: #fafafa;
+  border-right: 1px solid #ddd;
+  text-align: center;
+  color: #666;
+  padding-top: 8px;
+  font-size: 0.9rem;
+}
+
+.rbc-time-column,
+.rbc-day-slot {
+  flex: 1;
+  border-left: 1px solid #ddd;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #f0f0f0;
+}
+
+.rbc-timeslot-group {
+  min-height: 60px;
+}
+
+/* --- EVENTS --- */
 .rbc-event {
   background-color: #BC8C61;
   color: white;
   padding: 6px 10px;
   border-radius: 6px;
-  font-size: 0.9em; /* Adjusted font size */
+  font-size: 0.9em;
   font-weight: 500;
   border: none;
   margin: 2px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: normal; /* Allow text to wrap */
-  overflow: visible; /* Ensure text is visible */
-  text-overflow: clip; /* Prevent ellipsis for more content */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: break-word;
 }
 
 .rbc-event:hover {
@@ -166,13 +200,18 @@
   box-shadow: 0 0 0 2px #6d4c41;
 }
 
-/* Event content */
 .rbc-event-content {
   font-weight: 500;
   text-align: center;
-  white-space: normal; /* Allow text to wrap */
-  overflow: visible; /* Ensure content is visible */
-  text-overflow: clip; /* Prevent ellipsis */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.rbc-event-label {
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  color: #f1e1ce;
 }
 
 /* Slot selection */
@@ -236,7 +275,7 @@
 
   .calendar-container {
     padding: 10px;
-    width: 95%; /* Adjust for smaller screens */
+    width: 95%;
   }
 
   .rbc-calendar {
