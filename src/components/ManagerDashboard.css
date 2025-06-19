@@ -192,6 +192,37 @@
     }
     .greeting {
       font-size: 1.5rem;
+      margin-bottom: 0.2rem;
     }
   }
-  
+ 
+
+.greeting-box {
+  background: linear-gradient(#fffefb, #fff8e6);
+  border: 2px solid #d4af37;
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 850px;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+}
+
+.gold-ribbon {
+  display: block;
+  width: 180px;
+  height: auto;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  line-height: 0;     /* חשוב – מבטל ריווחים אנכיים מיותרים */
+  vertical-align: middle;
+}
+
+
+

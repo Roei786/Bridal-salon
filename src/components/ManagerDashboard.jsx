@@ -58,10 +58,14 @@ export default function ManagerDashboard() {
 
   return (
     <div className="manager-dashboard" dir="rtl">
-      <Typography variant="h4" className="greeting">
-        שלום {fullName || 'משתמש'} 👋
-      </Typography>
-
+       <div className="greeting-box">
+      <h1 className="greeting">שלום {fullName || 'משתמש'} 👋</h1>
+        <img
+          src="/gold-ribbon.png"
+          alt="סרט זהב"
+          className="gold-ribbon"
+        />
+      </div>
       <div className="content-box">
         <Box display="flex" gap={2} mb={2}>
           <TextField
@@ -97,7 +101,6 @@ export default function ManagerDashboard() {
             ))}
           </List>
         </Box>
-
       </div>
     </div>
   );
