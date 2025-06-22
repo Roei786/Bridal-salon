@@ -12,6 +12,7 @@ import Calendar from "./components/Calendar";
 import Login from "./components/Login";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import ReportsPage from './components/ReportsPage';
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const AppContent = () => {
                 <Route path="/brides" element={<Brides />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="/reports" element={<ReportsPage />} />
               </Routes>
             </main>
           </SidebarInset>
