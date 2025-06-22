@@ -33,7 +33,7 @@ import { getBrides, Bride } from '@/services/brideService';
 import { getAppointments, Appointment } from '@/services/appointmentService';
 import { getMeasurementsByBrideId, Measurement } from '@/services/measurementService';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
-
+import { useAuth } from '@/contexts/AuthContext';
 interface FormattedAppointment {
   id: string;
   name: string;
@@ -57,7 +57,7 @@ const Dashboard = () => {
   const [upcomingWeddings, setUpcomingWeddings] = useState(0);
   const [averageMeasurements, setAverageMeasurements] = useState(0);
   const [measurementsThisMonth, setMeasurementsThisMonth] = useState(0);
-
+   const {userData } = useAuth();
   // State for the Attendance Clock and Authentication
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
@@ -398,7 +398,7 @@ const Dashboard = () => {
         <p className="text-lg text-amber-700">ניהול הודיה - סלון הכלות החברתי שלך</p>
         {currentUser && (
           <p className="text-sm text-gray-600 mt-2">
-            שלום, {currentUser.displayName || currentUser.email}
+            שלום, {userData.fullName|| currentUser.email}
           </p>
         )}
       </div>
