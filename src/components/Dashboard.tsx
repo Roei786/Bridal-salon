@@ -1,19 +1,38 @@
-// filepath: /home/mohammad/Documents/azrieli/loveable project/kallah-calendar-manager/src/components/Dashboard.tsx
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { 
-  CalendarDays, Users, DollarSign, Clock, Crown, Heart, 
-  AlertCircle, Loader2, TrendingUp, Scissors, Calendar,
-  Ruler, ArrowUp, ArrowDown, LinkIcon, ExternalLink, ChevronLeft,
-  LayoutDashboard
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  CalendarDays,
+  Users,
+  DollarSign,
+  Clock,
+  Crown,
+  Heart,
+  AlertCircle,
+  Loader2,
+  TrendingUp,
+  Scissors,
+  Calendar,
+  Ruler,
+  ArrowUp,
+  ArrowDown,
+  LinkIcon,
+  ExternalLink,
+  ChevronLeft,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { format, startOfWeek, endOfWeek, isWithinInterval, addDays, differenceInDays, isBefore } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+
+// Import your services
 import { getBrides, Bride } from '@/services/brideService';
 import { getAppointments, Appointment } from '@/services/appointmentService';
 import { getMeasurementsByBrideId, Measurement } from '@/services/measurementService';
-import { format, startOfWeek, endOfWeek, isWithinInterval, addDays, subDays, differenceInDays, isBefore } from 'date-fns';
-import { Timestamp } from 'firebase/firestore';
-
+import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 
 interface FormattedAppointment {
   id: string;
@@ -29,7 +48,7 @@ const Dashboard = () => {
   const [brides, setBrides] = useState<Bride[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  
+
   // Stats state
   const [totalBrides, setTotalBrides] = useState(0);
   const [weeklyAppointments, setWeeklyAppointments] = useState(0);
@@ -38,8 +57,17 @@ const Dashboard = () => {
   const [upcomingWeddings, setUpcomingWeddings] = useState(0);
   const [averageMeasurements, setAverageMeasurements] = useState(0);
   const [measurementsThisMonth, setMeasurementsThisMonth] = useState(0);
-  
-  // Helper function to get a proper Date object from appointment.date
+
+  // State for the Attendance Clock and Authentication
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeShiftId, setActiveShiftId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isProcessingClockAction, setIsProcessingClockAction] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Helper function to get a proper Date object
   const getDateFromAppointment = (dateInput: Date | Timestamp | string): Date => {
     if (dateInput instanceof Date) {
       return dateInput;
@@ -58,50 +86,89 @@ const Dashboard = () => {
       return new Date();
     }
   };
-  
+
+  // useEffect for the live clock display
   useEffect(() => {
-    // Date range for this week - moved inside useEffect to prevent infinite loop
-    const today = new Date();
-    const weekStart = startOfWeek(today);
-    const weekEnd = endOfWeek(today);
-    
+    const timerId = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timerId);
+  }, []);
+
+  // useEffect to listen for authentication changes
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+      if (!user) {
+        // Reset state if user logs out
+        setIsClockedIn(false);
+        setShiftStartTime(null);
+        setActiveShiftId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Main data fetching useEffect, dependent on the current user
+  useEffect(() => {
     const fetchData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return; // Don't fetch if no user is logged in
+      }
       setLoading(true);
+
       try {
-        // Fetch brides
+        // Date range for this week
+        const today = new Date();
+        const weekStart = startOfWeek(today);
+        const weekEnd = endOfWeek(today);
+
+        // 1. Check for an active shift
+        try {
+          const activeShift = await getActiveShift(currentUser.uid);
+          if (activeShift && activeShift.clockInTime && !activeShift.clockOutTime) {
+            setIsClockedIn(true);
+            setShiftStartTime(activeShift.clockInTime.toDate());
+            setActiveShiftId(activeShift.id);
+          } else {
+            setIsClockedIn(false);
+            setShiftStartTime(null);
+            setActiveShiftId(null);
+          }
+        } catch (shiftError) {
+          console.error('Error fetching active shift:', shiftError);
+          // Continue with other data fetching even if shift fetch fails
+        }
+
+        // 2. Fetch brides
         const bridesData = await getBrides();
         setBrides(bridesData);
         setTotalBrides(bridesData.length);
-        
+
         // Count unpaid brides
         const unpaidCount = bridesData.filter(bride => !bride.paymentStatus).length;
         setUnpaidBrides(unpaidCount);
-        
 
-        
         // Count upcoming weddings (within the next 30 days)
         const thirtyDaysFromNow = addDays(today, 30);
         const weddingsCount = bridesData.filter(bride => {
-          const weddingDate = bride.weddingDate instanceof Date 
-            ? bride.weddingDate 
-            : bride.weddingDate instanceof Timestamp 
-              ? bride.weddingDate.toDate() 
-              : new Date(bride.weddingDate as unknown as string);
-          
+          const weddingDate = getDateFromAppointment(bride.weddingDate);
           return isBefore(weddingDate, thirtyDaysFromNow) && isBefore(today, weddingDate);
         }).length;
         setUpcomingWeddings(weddingsCount);
-        
-        // Fetch appointments
+
+        // 3. Fetch appointments
         const appointmentsData = await getAppointments();
         setAppointments(appointmentsData);
-        
+
         // Count appointments for this week
         const thisWeekAppointments = appointmentsData.filter(appointment => {
           const appointmentDate = getDateFromAppointment(appointment.date);
           return isWithinInterval(appointmentDate, { start: weekStart, end: weekEnd });
         });
         setWeeklyAppointments(thisWeekAppointments.length);
+
         // Count completed services this week
         const completedThisWeek = appointmentsData.filter(appointment => {
           const appointmentDate = getDateFromAppointment(appointment.date);
@@ -109,8 +176,8 @@ const Dashboard = () => {
             appointment.status === 'Completed';
         });
         setCompletedServices(completedThisWeek.length);
-        
-        // Fetch all measurements for analytics
+
+        // 4. Fetch all measurements for analytics
         let allMeasurements: Measurement[] = [];
         for (const bride of bridesData) {
           if (bride.id) {
@@ -122,39 +189,67 @@ const Dashboard = () => {
             }
           }
         }
-        
+
         setMeasurements(allMeasurements);
-        
+
         // Calculate average measurements per bride
         const uniqueBrideIds = new Set(allMeasurements.map(m => m.brideID)).size;
         const avgMeasurements = uniqueBrideIds > 0 ? 
           Math.round((allMeasurements.length / uniqueBrideIds) * 10) / 10 : 0;
         setAverageMeasurements(avgMeasurements);
-        
+
         // Count measurements this month
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         const measurementsCount = allMeasurements.filter(measurement => {
-          const measurementDate = measurement.date instanceof Date 
-            ? measurement.date 
-            : measurement.date instanceof Timestamp 
-              ? measurement.date.toDate() 
-              : new Date();
-          
+          const measurementDate = getDateFromAppointment(measurement.date);
           return measurementDate >= firstDayOfMonth;
         }).length;
         setMeasurementsThisMonth(measurementsCount);
-        
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-  }, []);
-  
-  // Format dashboard stats
+  }, [currentUser]);
+
+  // Handlers for clocking in and out
+  const handleClockIn = async () => {
+    if (!currentUser) return;
+    setIsProcessingClockAction(true);
+    try {
+      const newShiftId = await clockIn(currentUser.uid);
+      setActiveShiftId(newShiftId);
+      setIsClockedIn(true);
+      setShiftStartTime(new Date());
+    } catch (error) {
+      console.error('Error clocking in:', error);
+      // You might want to show a toast notification here
+    } finally {
+      setIsProcessingClockAction(false);
+    }
+  };
+
+  const handleClockOut = async () => {
+    if (!activeShiftId || !shiftStartTime) return;
+    setIsProcessingClockAction(true);
+    try {
+      await clockOut(activeShiftId, shiftStartTime);
+      setIsClockedIn(false);
+      setShiftStartTime(null);
+      setActiveShiftId(null);
+    } catch (error) {
+      console.error('Error clocking out:', error);
+      // You might want to show a toast notification here  
+    } finally {
+      setIsProcessingClockAction(false);
+    }
+  };
+
+  // Dashboard stats configuration
   const stats = [
     {
       title: 'סה"כ כלות רשומות',
@@ -185,7 +280,7 @@ const Dashboard = () => {
       bgColor: 'bg-rose-50'
     }
   ];
-  
+
   const extraStats = [
     {
       title: 'חתונות ב-30 יום הקרובים',
@@ -238,7 +333,7 @@ const Dashboard = () => {
       return `${dayName} - ${formattedFullDate}`;
     }
   };
-  
+
   const upcomingAppointments: FormattedAppointment[] = appointments
     .filter(appointment => {
       const appointmentDate = getDateFromAppointment(appointment.date);
@@ -266,15 +361,46 @@ const Dashboard = () => {
                 appointment.status === 'Completed' ? 'הושלם' : 'מאושר'
       };
     });
-console.log('====================================');
-console.log(appointments);
-console.log('====================================');
+
+  // Show loading screen while checking authentication
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 text-amber-600 animate-spin mb-4" />
+        <p className="text-lg text-gray-600">טוען...</p>
+      </div>
+    );
+  }
+
+  // Show login required message if no user is authenticated
+  if (!currentUser) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h3 className="text-2xl font-semibold text-gray-900 mb-2">נדרשת התחברות</h3>
+          <p className="text-gray-600 mb-6">יש להתחבר למערכת כדי לראות את לוח המחוונים.</p>
+          <Link to="/login">
+            <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+              עבור להתחברות
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">לוח מחוונים</h1>
         <p className="text-lg text-amber-700">ניהול הודיה - סלון הכלות החברתי שלך</p>
+        {currentUser && (
+          <p className="text-sm text-gray-600 mt-2">
+            שלום, {currentUser.displayName || currentUser.email}
+          </p>
+        )}
       </div>
 
       {/* Loading state */}
@@ -285,6 +411,59 @@ console.log('====================================');
         </div>
       ) : (
         <>
+          {/* Attendance Clock Section */}
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-6 w-6 text-amber-700" />
+                שעון נוכחות
+              </CardTitle>
+              <CardDescription>
+                {isClockedIn && shiftStartTime
+                  ? `נכנסת למשמרת ביום ${shiftStartTime.toLocaleDateString('he-IL')} בשעה ${shiftStartTime.toLocaleTimeString('he-IL')}`
+                  : 'הינך מחוץ למשמרת. לחץ על "כניסה" להתחלת משמרת.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <p className="text-5xl font-bold font-mono text-gray-800">
+                  {currentTime.toLocaleTimeString('he-IL')}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {currentTime.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleClockIn}
+                  disabled={isClockedIn || isProcessingClockAction}
+                  size="lg"
+                  className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1"
+                >
+                  {isProcessingClockAction && !isClockedIn ? (
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <LogIn className="ml-2 h-5 w-5" />
+                  )}
+                  כניסה
+                </Button>
+                <Button
+                  onClick={handleClockOut}
+                  disabled={!isClockedIn || isProcessingClockAction}
+                  size="lg"
+                  className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1"
+                >
+                  {isProcessingClockAction && isClockedIn ? (
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <LogOut className="ml-2 h-5 w-5" />
+                  )}
+                  יציאה
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
@@ -383,24 +562,12 @@ console.log('====================================');
                         // Get upcoming weddings sorted by date
                         const upcomingWeddingsData = brides
                           .filter(bride => {
-                            const weddingDate = bride.weddingDate instanceof Date 
-                              ? bride.weddingDate 
-                              : bride.weddingDate instanceof Timestamp 
-                                ? bride.weddingDate.toDate() 
-                                : new Date(bride.weddingDate as unknown as string);
+                            const weddingDate = getDateFromAppointment(bride.weddingDate);
                             return weddingDate >= new Date();
                           })
                           .sort((a, b) => {
-                            const dateA = a.weddingDate instanceof Date 
-                              ? a.weddingDate 
-                              : a.weddingDate instanceof Timestamp 
-                                ? a.weddingDate.toDate() 
-                                : new Date(a.weddingDate as unknown as string);
-                            const dateB = b.weddingDate instanceof Date 
-                              ? b.weddingDate 
-                              : b.weddingDate instanceof Timestamp 
-                                ? b.weddingDate.toDate() 
-                                : new Date(b.weddingDate as unknown as string);
+                            const dateA = getDateFromAppointment(a.weddingDate);
+                            const dateB = getDateFromAppointment(b.weddingDate);
                             return dateA.getTime() - dateB.getTime();
                           })
                           .slice(0, 4);
@@ -408,12 +575,7 @@ console.log('====================================');
                         return upcomingWeddingsData.length > 0 ? (
                           <div className="space-y-3">
                             {upcomingWeddingsData.map((bride) => {
-                              const weddingDate = bride.weddingDate instanceof Date 
-                                ? bride.weddingDate 
-                                : bride.weddingDate instanceof Timestamp 
-                                  ? bride.weddingDate.toDate() 
-                                  : new Date(bride.weddingDate as unknown as string);
-                              
+                              const weddingDate = getDateFromAppointment(bride.weddingDate);
                               const daysUntil = differenceInDays(weddingDate, new Date());
                               let badgeColor = 'bg-gray-100 text-gray-800';
                               
@@ -531,5 +693,3 @@ console.log('====================================');
     </div>
   );
 };
-
-export default Dashboard;
