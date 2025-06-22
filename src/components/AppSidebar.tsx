@@ -3,6 +3,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { FileText } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -34,6 +35,12 @@ const AppSidebar = () => {
       label: 'לוח זמנים',
       icon: Calendar
     },
+    {
+    to: '/reports',
+    label: 'הפקת דוחות',
+    icon: FileText // תצטרך לייבא את האייקון הזה מ־lucide-react
+    }
+
   ];
 
   return (
