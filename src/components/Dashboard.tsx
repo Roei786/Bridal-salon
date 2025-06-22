@@ -398,7 +398,7 @@ const Dashboard = () => {
         <p className="text-lg text-amber-700">ניהול הודיה - סלון הכלות החברתי שלך</p>
         {currentUser && (
           <p className="text-sm text-gray-600 mt-2">
-            שלום, {userData.fullName|| currentUser.email}
+            שלום
           </p>
         )}
       </div>
