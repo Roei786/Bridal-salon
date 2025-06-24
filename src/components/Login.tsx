@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import logo from '../../public/files/logo.png'
+<img src="/files/logo.png" alt="לוגו" />
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -219,11 +220,8 @@ const Login = () => {
         
         <CardHeader className="text-center pb-8 relative">
           <div className="mx-auto mb-6 w-24 h-24 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative">
-            <img 
-              src={logo} 
-              alt="הודיה לוגו" 
-              className="w-20 h-20 object-contain"
-            />
+            <img src="/files/logo.png" alt="הודיה לוגו" className="w-20 h-20 object-contain" />
+
             <div className="absolute -top-2 -right-2 text-rose-400 animate-twinkle">
               <Sparkles size={16} />
             </div>
