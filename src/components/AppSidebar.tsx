@@ -53,7 +53,7 @@ const AppSidebar = () => {
     {
       to: '/data',
       label: 'נתונים',
-      icon: Calendar
+      icon: FileText
     },
   ];
 

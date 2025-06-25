@@ -11,7 +11,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { collection, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/firebase-config'; // ודא שזה הנתיב לקובץ firebase שלך
-
+import SeamstressPieChart from './SeamstressPieChart';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const months = [
@@ -89,7 +89,7 @@ const WeddingsStatsPage = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-amber-800 mb-4">סטטיסטיקות חתונות</h1>
+      <h1 className="text-2xl font-bold text-amber-800 mb-4">סטטיסטיקות ונתונים</h1>
 
       <div className="mb-6">
         <label className="text-sm font-medium text-gray-700 mr-2">בחר שנה:</label>
@@ -110,6 +110,7 @@ const WeddingsStatsPage = () => {
     <Bar data={chartData} options={options} />
   )}
 </div>
+    <SeamstressPieChart />
 
     </div>
   );
