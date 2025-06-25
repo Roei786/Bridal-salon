@@ -124,23 +124,6 @@ const Dashboard = () => {
         const weekStart = startOfWeek(today);
         const weekEnd = endOfWeek(today);
 
-        // 1. Check for an active shift
-        try {
-          const activeShift = await getActiveShift(currentUser.uid);
-          if (activeShift && activeShift.clockInTime && !activeShift.clockOutTime) {
-            setIsClockedIn(true);
-            setShiftStartTime(activeShift.clockInTime.toDate());
-            setActiveShiftId(activeShift.id);
-          } else {
-            setIsClockedIn(false);
-            setShiftStartTime(null);
-            setActiveShiftId(null);
-          }
-        } catch (shiftError) {
-          console.error('Error fetching active shift:', shiftError);
-          // Continue with other data fetching even if shift fetch fails
-        }
-
         // 2. Fetch brides
         const bridesData = await getBrides();
         setBrides(bridesData);
@@ -215,39 +198,6 @@ const Dashboard = () => {
 
     fetchData();
   }, [currentUser]);
-
-  // Handlers for clocking in and out
-  const handleClockIn = async () => {
-    if (!currentUser) return;
-    setIsProcessingClockAction(true);
-    try {
-      const newShiftId = await clockIn(currentUser.uid);
-      setActiveShiftId(newShiftId);
-      setIsClockedIn(true);
-      setShiftStartTime(new Date());
-    } catch (error) {
-      console.error('Error clocking in:', error);
-      // You might want to show a toast notification here
-    } finally {
-      setIsProcessingClockAction(false);
-    }
-  };
-
-  const handleClockOut = async () => {
-    if (!activeShiftId || !shiftStartTime) return;
-    setIsProcessingClockAction(true);
-    try {
-      await clockOut(activeShiftId, shiftStartTime);
-      setIsClockedIn(false);
-      setShiftStartTime(null);
-      setActiveShiftId(null);
-    } catch (error) {
-      console.error('Error clocking out:', error);
-      // You might want to show a toast notification here  
-    } finally {
-      setIsProcessingClockAction(false);
-    }
-  };
 
   // Dashboard stats configuration
   const stats = [
@@ -411,96 +361,6 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          {/* Attendance Clock Section */}
-          <Card className="border-amber-200 bg-amber-50/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-6 w-6 text-amber-700" />
-                שעון נוכחות
-              </CardTitle>
-              <CardDescription>
-                {isClockedIn && shiftStartTime
-                  ? `נכנסת למשמרת ביום ${shiftStartTime.toLocaleDateString('he-IL')} בשעה ${shiftStartTime.toLocaleTimeString('he-IL')}`
-                  : 'הינך מחוץ למשמרת. לחץ על "כניסה" להתחלת משמרת.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <p className="text-5xl font-bold font-mono text-gray-800">
-                  {currentTime.toLocaleTimeString('he-IL')}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {currentTime.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-              </div>
-              <div className="flex gap-4">
-                <Button
-                  onClick={handleClockIn}
-                  disabled={isClockedIn || isProcessingClockAction}
-                  size="lg"
-                  className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1"
-                >
-                  {isProcessingClockAction && !isClockedIn ? (
-                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <LogIn className="ml-2 h-5 w-5" />
-                  )}
-                  כניסה
-                </Button>
-                <Button
-                  onClick={handleClockOut}
-                  disabled={!isClockedIn || isProcessingClockAction}
-                  size="lg"
-                  className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1"
-                >
-                  {isProcessingClockAction && isClockedIn ? (
-                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <LogOut className="ml-2 h-5 w-5" />
-                  )}
-                  יציאה
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {/* Additional Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {extraStats.map((stat, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -627,70 +487,50 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Quick Links Section */}
-          <Card className="border-amber-100">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <LinkIcon className="h-5 w-5 text-amber-600" />
-                קישורים מהירים
-              </CardTitle>
-              <CardDescription>גישה מהירה לאזורים נפוצים במערכת</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Dashboard Link - Current page */}
-                <Link to="/" className="group">
-                  <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 transition-all duration-300 hover:shadow-md flex items-center justify-between group-hover:bg-amber-100">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-amber-100 group-hover:bg-amber-200">
-                        <LayoutDashboard className="h-5 w-5 text-amber-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-amber-900">לוח מחוונים</h3>
-                        <p className="text-xs text-amber-700">הצג נתונים וסטטיסטיקות</p>
-                      </div>
-                    </div>
-                    <ChevronLeft className="h-5 w-5 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </Link>
-
-                {/* Brides Management Link */}
-                <Link to="/brides" className="group">
-                  <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-300 hover:shadow-md flex items-center justify-between group-hover:bg-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200">
-                        <Crown className="h-5 w-5 text-amber-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">ניהול כלות</h3>
-                        <p className="text-xs text-gray-600">צפייה ועריכת פרטי כלות</p>
-                      </div>
-                    </div>
-                    <ChevronLeft className="h-5 w-5 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </Link>
-
-                {/* Calendar Link */}
-                <Link to="/calendar" className="group">
-                  <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-300 hover:shadow-md flex items-center justify-between group-hover:bg-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200">
-                        <Calendar className="h-5 w-5 text-amber-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">לוח זמנים</h3>
-                        <p className="text-xs text-gray-600">ניהול תורים ומפגשים</p>
-                      </div>
-                    </div>
-                    <ChevronLeft className="h-5 w-5 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          
+    
         </>
       )}
+      
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {/* Additional Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+            {extraStats.map((stat, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
     </div>
+    
+    
   );
 };
 export default Dashboard;
