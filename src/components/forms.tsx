@@ -18,12 +18,20 @@ const ReportsPage = () => {
     }
   };
 
+  const handlePreview = (file: string) => {
+    const url = `/docs/${file}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 text-amber-800">הפקת דוחות</h1>
+      <h1 className="text-2xl font-bold mb-6 text-amber-800">טפסים</h1>
       <ul className="space-y-6">
         {reports.map((report, index) => (
-          <li key={index} className="bg-white p-6 rounded shadow flex items-center justify-between hover:bg-amber-50 transition">
+          <li
+            key={index}
+            className="bg-white p-6 rounded shadow flex items-center justify-between hover:bg-amber-50 transition"
+          >
             <span className="text-gray-800 font-medium">{report.name}</span>
             <div className="flex gap-4">
               <a
@@ -38,6 +46,12 @@ const ReportsPage = () => {
                 className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition"
               >
                 הדפסה
+              </button>
+              <button
+                onClick={() => handlePreview(report.file)}
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition"
+              >
+                תצוגה מקדימה
               </button>
             </div>
           </li>

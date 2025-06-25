@@ -1,7 +1,6 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck } from 'lucide-react';
+import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck, Clock, LogIn, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FileText } from 'lucide-react';
 import {
@@ -15,10 +14,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 import logo from '../../public/files/logo.png';
 
 const AppSidebar = () => {
   const { logout, currentUser, userData } = useAuth();
+  
+  // Attendance Clock State
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeShiftId, setActiveShiftId] = useState<string | null>(null);
+  const [isProcessingClockAction, setIsProcessingClockAction] = useState(false);
+
   const navItems = [
     {
       to: '/',
@@ -36,17 +46,77 @@ const AppSidebar = () => {
       icon: Calendar
     },
     {
-    to: '/forms',
-    label: 'טפסים',
-    icon: FileText // תצטרך לייבא את האייקון הזה מ־lucide-react
-    },
-    {
-    to: '/data',
-    label: 'נתונים',
-    icon: FileText 
+      to: '/forms',
+      label: 'טפסים',
+      icon: FileText
     }
-
   ];
+
+  // useEffect for the live clock display
+  useEffect(() => {
+    const timerId = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timerId);
+  }, []);
+
+  // useEffect to check for active shift when user changes
+  useEffect(() => {
+    const checkActiveShift = async () => {
+      if (!currentUser) {
+        setIsClockedIn(false);
+        setShiftStartTime(null);
+        setActiveShiftId(null);
+        return;
+      }
+
+      try {
+        const activeShift = await getActiveShift(currentUser.uid);
+        if (activeShift && activeShift.clockInTime && !activeShift.clockOutTime) {
+          setIsClockedIn(true);
+          setShiftStartTime(activeShift.clockInTime.toDate());
+          setActiveShiftId(activeShift.id);
+        } else {
+          setIsClockedIn(false);
+          setShiftStartTime(null);
+          setActiveShiftId(null);
+        }
+      } catch (error) {
+        console.error('Error fetching active shift:', error);
+      }
+    };
+
+    checkActiveShift();
+  }, [currentUser]);
+
+  // Handlers for clocking in and out
+  const handleClockIn = async () => {
+    if (!currentUser) return;
+    setIsProcessingClockAction(true);
+    try {
+      const newShiftId = await clockIn(currentUser.uid);
+      setActiveShiftId(newShiftId);
+      setIsClockedIn(true);
+      setShiftStartTime(new Date());
+    } catch (error) {
+      console.error('Error clocking in:', error);
+    } finally {
+      setIsProcessingClockAction(false);
+    }
+  };
+
+  const handleClockOut = async () => {
+    if (!activeShiftId || !shiftStartTime) return;
+    setIsProcessingClockAction(true);
+    try {
+      await clockOut(activeShiftId, shiftStartTime);
+      setIsClockedIn(false);
+      setShiftStartTime(null);
+      setActiveShiftId(null);
+    } catch (error) {
+      console.error('Error clocking out:', error);
+    } finally {
+      setIsProcessingClockAction(false);
+    }
+  };
 
   return (
     <Sidebar side="right" className="border-l border-amber-200">
@@ -67,6 +137,8 @@ const AppSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent>
+      
+
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-5 my-4 px-2">
@@ -99,8 +171,64 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
+                
       <SidebarFooter className="p-4 border-t border-amber-200">
+        <div>
+          {/* Attendance Clock Section */}
+        {currentUser && (
+          <div className="p-4 border-b border-amber-200">
+            <Card className="border-amber-200 bg-amber-50/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-amber-700" />
+                  שעון נוכחות
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {isClockedIn && shiftStartTime
+                    ? `נכנסת ב-${shiftStartTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
+                    : 'מחוץ למשמרת'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-center mb-3">
+                  <p className="text-2xl font-bold font-mono text-gray-800">
+                    {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {currentTime.toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleClockIn}
+                    disabled={isClockedIn || isProcessingClockAction}
+                    size="sm"
+                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1 text-xs"
+                  >
+                    {isProcessingClockAction && !isClockedIn ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <LogIn className="h-3 w-3" />
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleClockOut}
+                    disabled={!isClockedIn || isProcessingClockAction}
+                    size="sm"
+                    className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white flex-1 text-xs"
+                  >
+                    {isProcessingClockAction && isClockedIn ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <LogOut className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        </div>
         <div className="flex items-center gap-3 mb-4 group-data-[collapsible=icon]:justify-center">
           <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
             <Users className="h-5 w-5 text-amber-600" />
