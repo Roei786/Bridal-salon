@@ -36,9 +36,14 @@ const AppSidebar = () => {
       icon: Calendar
     },
     {
-    to: '/reports',
-    label: 'הפקת דוחות',
+    to: '/forms',
+    label: 'טפסים',
     icon: FileText // תצטרך לייבא את האייקון הזה מ־lucide-react
+    },
+    {
+    to: '/data',
+    label: 'נתונים',
+    icon: FileText 
     }
 
   ];
