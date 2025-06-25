@@ -46,8 +46,13 @@ const AppSidebar = () => {
       icon: Calendar
     },
     {
+<<<<<<< HEAD
       to: '/forms',
       label: 'טפסים',
+=======
+      to: '/reports',
+      label: 'הפקת דוחות',
+>>>>>>> 71712818042ee8dbbc705f9fbdefdd8a0a564c9a
       icon: FileText
     }
   ];
