@@ -34,6 +34,10 @@ import { getAppointments, Appointment } from '@/services/appointmentService';
 import { getMeasurementsByBrideId, Measurement } from '@/services/measurementService';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Import the background image
+import background from '../../public/files/background.jpg'
+
 interface FormattedAppointment {
   id: string;
   name: string;
@@ -57,7 +61,7 @@ const Dashboard = () => {
   const [upcomingWeddings, setUpcomingWeddings] = useState(0);
   const [averageMeasurements, setAverageMeasurements] = useState(0);
   const [measurementsThisMonth, setMeasurementsThisMonth] = useState(0);
-   const {userData } = useAuth();
+  const { userData } = useAuth();
   // State for the Attendance Clock and Authentication
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
@@ -155,7 +159,7 @@ const Dashboard = () => {
         // Count completed services this week
         const completedThisWeek = appointmentsData.filter(appointment => {
           const appointmentDate = getDateFromAppointment(appointment.date);
-          return isWithinInterval(appointmentDate, { start: weekStart, end: weekEnd }) && 
+          return isWithinInterval(appointmentDate, { start: weekStart, end: weekEnd }) &&
             appointment.status === 'Completed';
         });
         setCompletedServices(completedThisWeek.length);
@@ -177,7 +181,7 @@ const Dashboard = () => {
 
         // Calculate average measurements per bride
         const uniqueBrideIds = new Set(allMeasurements.map(m => m.brideID)).size;
-        const avgMeasurements = uniqueBrideIds > 0 ? 
+        const avgMeasurements = uniqueBrideIds > 0 ?
           Math.round((allMeasurements.length / uniqueBrideIds) * 10) / 10 : 0;
         setAverageMeasurements(avgMeasurements);
 
@@ -260,23 +264,23 @@ const Dashboard = () => {
     const dateObj = getDateFromAppointment(date);
     const todayDate = new Date();
     const tomorrowDate = addDays(todayDate, 1);
-    
+
     // Format the date as dd/MM/yyyy
     const formattedFullDate = format(dateObj, 'dd/MM/yyyy');
-    
+
     // Create copies of the dates for comparison without modifying the original
     const dateObjCopy = new Date(dateObj);
     const todayCopy = new Date(todayDate);
     const tomorrowCopy = new Date(tomorrowDate);
-    
+
     // Hebrew days of week
     const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'יום שבת'];
     const dayName = days[dateObj.getDay()];
-    
+
     // Compare only the date part, not the time
-    if (dateObjCopy.setHours(0,0,0,0) === todayCopy.setHours(0,0,0,0)) {
+    if (dateObjCopy.setHours(0, 0, 0, 0) === todayCopy.setHours(0, 0, 0, 0)) {
       return `היום - ${formattedFullDate}`;
-    } else if (dateObjCopy.setHours(0,0,0,0) === tomorrowCopy.setHours(0,0,0,0)) {
+    } else if (dateObjCopy.setHours(0, 0, 0, 0) === tomorrowCopy.setHours(0, 0, 0, 0)) {
       return `מחר - ${formattedFullDate}`;
     } else {
       // Return day of week in Hebrew with the date
@@ -300,15 +304,15 @@ const Dashboard = () => {
       // Find the bride for this appointment
       const bride = brides.find(b => b.id === appointment.brideId);
       const appointmentDate = getDateFromAppointment(appointment.date);
-      
+
       return {
         id: appointment.id || '',
         name: bride?.fullName || 'לקוחה לא מזוהה',
         time: format(appointmentDate, 'HH:mm'),
         date: getFormattedDate(appointment.date),
         service: appointment.type || 'פגישת ייעוץ',
-        status: appointment.status === 'Pending' ? 'ממתין לאישור' : 
-                appointment.status === 'Completed' ? 'הושלם' : 'מאושר'
+        status: appointment.status === 'Pending' ? 'ממתין לאישור' :
+          appointment.status === 'Completed' ? 'הושלם' : 'מאושר'
       };
     });
 
@@ -342,11 +346,26 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-    <h1 className="text-4xl font-bold text-gray-900 mb-2">הודיה - סלון כלות חברתי</h1>
-    {userData && (<p className="text-lg text-amber-700">שלום, {userData.fullName}</p>)}
-</div>
+      {/* Header with background image */}
+      <div
+        className="text-center mb-8 p-10 rounded-lg shadow-xl"
+        style={{
+          backgroundImage: `url(${background})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          color: 'white', // Ensure text is visible over the image
+          textShadow: '2px 2px 4px rgba(0,0,0,0.7)', // Add text shadow for better readability
+          minHeight: '200px', // Ensure enough height for the background image to show
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <h1 className="text-4xl font-bold mb-2">הודיה - סלון כלות חברתי</h1>
+        {userData && (<p className="text-lg">שלום, {userData.fullName}</p>)}
+      </div>
 
       {/* Loading state */}
       {loading ? (
@@ -382,8 +401,8 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          appointment.status === 'מאושר' 
-                            ? 'bg-green-100 text-green-800' 
+                          appointment.status === 'מאושר'
+                            ? 'bg-green-100 text-green-800'
                             : appointment.status === 'הושלם'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-yellow-100 text-yellow-800'
@@ -433,11 +452,11 @@ const Dashboard = () => {
                               const weddingDate = getDateFromAppointment(bride.weddingDate);
                               const daysUntil = differenceInDays(weddingDate, new Date());
                               let badgeColor = 'bg-gray-100 text-gray-800';
-                              
+
                               if (daysUntil < 7) badgeColor = 'bg-red-100 text-red-800';
                               else if (daysUntil < 30) badgeColor = 'bg-amber-100 text-amber-800';
                               else badgeColor = 'bg-green-100 text-green-800';
-                              
+
                               return (
                                 <div key={bride.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                                   <div>
@@ -455,7 +474,7 @@ const Dashboard = () => {
                           <p className="text-center text-gray-500">אין חתונות מתוכננות בקרוב</p>
                         );
                       })()}
-                      
+
                       <div className="grid grid-cols-1 mt-3">
                         <div className="p-4 bg-amber-50 rounded-lg">
                           <div className="flex justify-between items-center">
@@ -482,50 +501,49 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          
-    
+
         </>
       )}
-      
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          {/* Additional Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {extraStats.map((stat, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      {/* Additional Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        {extraStats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-300 border-amber-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
-    
-    
+
+
   );
 };
 export default Dashboard;
