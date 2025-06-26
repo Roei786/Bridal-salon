@@ -344,14 +344,9 @@ const Dashboard = () => {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">לוח מחוונים</h1>
-        <p className="text-lg text-amber-700">ניהול הודיה - סלון הכלות החברתי שלך</p>
-        {currentUser && (
-          <p className="text-sm text-gray-600 mt-2">
-            שלום
-          </p>
-        )}
-      </div>
+    <h1 className="text-4xl font-bold text-gray-900 mb-2">הודיה - סלון כלות חברתי</h1>
+    {userData && (<p className="text-lg text-amber-700">שלום, {userData.fullName}</p>)}
+</div>
 
       {/* Loading state */}
       {loading ? (
