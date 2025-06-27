@@ -50,6 +50,7 @@
     "embla-carousel-react": "^8.6.0",
     "esbuild": "^0.25.4",
     "firebase": "^11.7.3",
+    "framer-motion": "^12.19.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.522.0",
     "nanoid": "^5.1.5",
@@ -67,6 +68,7 @@
     "sonner": "^2.0.5",
     "stylis": "^4.3.6",
     "stylis-plugin-rtl": "^2.1.1",
+    "swiper": "^11.2.8",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2"
@@ -79,10 +81,12 @@
     "@typescript-eslint/parser": "^8.34.1",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitejs/plugin-react-swc": "^3.10.2",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.22.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "tailwindcss": "^3.4.17",
     "vite": "^6.3.5"
   }
 }

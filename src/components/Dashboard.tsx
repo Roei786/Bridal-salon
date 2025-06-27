@@ -36,7 +36,8 @@ import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Import the background image
-import background from '../../public/files/background.jpg'
+import background from '/public/files/background.jpg'
+
 
 interface FormattedAppointment {
   id: string;
