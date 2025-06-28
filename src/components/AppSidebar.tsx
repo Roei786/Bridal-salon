@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck, Clock, LogIn, Loader2 } from 'lucide-react';
+import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck, Clock, LogIn, Loader2 ,Briefcase} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FileText } from 'lucide-react';
 import {
@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
-import logo from '/public/files/logo.png'
+import logo from '/files/logo.png';
 
 const AppSidebar = () => {
   const { logout, currentUser, userData } = useAuth();
@@ -55,6 +55,11 @@ const AppSidebar = () => {
       label: 'נתונים',
       icon: FileText
     },
+    {
+      to: '/employee-hours', // זה הנתיב שהגדרנו בראוטר
+      label: 'דוח שעות',
+      icon: Briefcase       // האייקון החדש שייבאנו
+    }
   ];
 
   // useEffect for the live clock display
@@ -65,39 +70,33 @@ const AppSidebar = () => {
 
   // useEffect to check for active shift when user changes
   useEffect(() => {
-    const checkActiveShift = async () => {
-      if (!currentUser) {
-        setIsClockedIn(false);
-        setShiftStartTime(null);
-        setActiveShiftId(null);
-        return;
+  const checkActiveShift = async () => {
+    // ... (הלוגיקה הפנימית) ...
+    try {
+      const activeShift = await getActiveShift(currentUser.uid);
+      if (activeShift && activeShift.clockInTime && !activeShift.clockOutTime) {
+        setIsClockedIn(true);
+        setShiftStartTime(activeShift.clockInTime.toDate());
+        setActiveShiftId(activeShift.id);
+      } else {
+        // ... (איפוס מצב) ...
       }
+    } catch (error) {
+      console.error('Error fetching active shift:', error);
+    }
+  };
 
-      try {
-        const activeShift = await getActiveShift(currentUser.uid);
-        if (activeShift && activeShift.clockInTime && !activeShift.clockOutTime) {
-          setIsClockedIn(true);
-          setShiftStartTime(activeShift.clockInTime.toDate());
-          setActiveShiftId(activeShift.id);
-        } else {
-          setIsClockedIn(false);
-          setShiftStartTime(null);
-          setActiveShiftId(null);
-        }
-      } catch (error) {
-        console.error('Error fetching active shift:', error);
-      }
-    };
-
-    checkActiveShift();
-  }, [currentUser]);
+  checkActiveShift();
+}, [currentUser]);
 
   // Handlers for clocking in and out
+  // AppSidebar.jsx -> handleClockIn
   const handleClockIn = async () => {
     if (!currentUser) return;
     setIsProcessingClockAction(true);
     try {
-      const newShiftId = await clockIn(currentUser.uid);
+      // העברת שם המשתמש לפונקציה
+      const newShiftId = await clockIn(currentUser.uid, userData?.fullName); 
       setActiveShiftId(newShiftId);
       setIsClockedIn(true);
       setShiftStartTime(new Date());
@@ -108,11 +107,13 @@ const AppSidebar = () => {
     }
   };
 
+  // AppSidebar.jsx -> handleClockOut
   const handleClockOut = async () => {
     if (!activeShiftId || !shiftStartTime) return;
     setIsProcessingClockAction(true);
     try {
-      await clockOut(activeShiftId, shiftStartTime);
+      // כעת הפונקציה מקבלת גם את זמן הכניסה לחישוב
+      await clockOut(activeShiftId, shiftStartTime); 
       setIsClockedIn(false);
       setShiftStartTime(null);
       setActiveShiftId(null);

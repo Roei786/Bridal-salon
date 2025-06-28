@@ -15,6 +15,7 @@ import ReportsPage from './components/forms';
 import WeddingsStatsPage from './components/data';
 import BrideProfile from "./components/brideProfile";
 import PublicMeasurementForm from "./components/PublicMeasurementForm";
+import EmployeeHoursPage from './components/EmployeeHoursPage';
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const ProtectedRoutes = () => {
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/forms" element={<ReportsPage />} />
               <Route path="/data" element={<WeddingsStatsPage />} />
+              <Route path="/employee-hours" element={<EmployeeHoursPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
