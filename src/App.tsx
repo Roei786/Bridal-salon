@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import RegisterPage from './pages/RegisterPage';
 
 import AppSidebar from "./components/AppSidebar";
 import Dashboard from "./components/Dashboard";
@@ -16,7 +17,7 @@ import ReportsPage from './components/forms';
 import WeddingsStatsPage from './components/data';
 import BrideProfile from "./components/brideProfile";
 import PublicMeasurementForm from "./components/PublicMeasurementForm";
-import EmployeeHoursPage from './components/EmployeeHoursPage';
+import EmployeeHoursPage from './components/EmployeeHoursPage.tsx';
 import UserAreaComponent from './components/UserArea'; // 👈 Import the component
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => {
               {/* 🔓 Public form – accessible without login */}
               <Route path="/measurements/:brideId/form" element={<PublicMeasurementForm />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register/:token" element={<RegisterPage />} />
               {/* 🔐 Protected routes */}
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>
