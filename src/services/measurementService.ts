@@ -65,11 +65,11 @@ const convertMeasurementForFirestore = (measurement: Measurement) => {
   };
 };
 
-// Get all measurements for a bride
+// Get all measurements for a bride (from the main collection)
 export const getMeasurementsByBrideId = async (brideId: string): Promise<Measurement[]> => {
   try {
     const measurementsQuery = query(
-      collection(db, 'measurements'),
+      collection(db, 'measurements'), // ✅ חזרה לאוסף הראשי
       where('brideID', '==', brideId)
     );
     const snapshot = await getDocs(measurementsQuery);

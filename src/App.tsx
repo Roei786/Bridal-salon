@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,65 +13,42 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ReportsPage from './components/forms';
 import WeddingsStatsPage from './components/data';
-
+import BrideProfile from "./components/brideProfile";
+import PublicMeasurementForm from "./components/PublicMeasurementForm";
 
 const queryClient = new QueryClient();
 
-// A wrapper component to protect routes that require authentication
-const ProtectedRoute: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+const ProtectedRoutes = () => {
   const { currentUser } = useAuth();
-  
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <>{children}</>;
-};
 
-// The main app content that uses authentication
-const AppContent = () => {
-  const { currentUser } = useAuth();
-  
-  if (!currentUser) {
-    return (
-      <>
-        <Toaster />
-        <Sonner />
-        <Login />
-      </>
-    );
-  }
+  if (!currentUser) return <Navigate to="/login" />;
 
   return (
-    <BrowserRouter>
-      <SidebarProvider>
-        <div className="min-h-screen bg-gray-50 w-full flex">
-          <AppSidebar />
-          <SidebarInset className="flex-1">
-            <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-amber-200 bg-white">
-              <SidebarTrigger className="-ml-1" />
-              <div className="flex-1" />
-            </header>
-            <main className="flex-1 p-6">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/brides" element={<Brides />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="*" element={<NotFound />} />
-                <Route path="/forms" element={<ReportsPage />} />
-                <Route path="/data" element={<WeddingsStatsPage />} />
-              </Routes>
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-    </BrowserRouter>
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50 w-full flex">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-amber-200 bg-white">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex-1" />
+          </header>
+          <main className="flex-1 p-6">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/brides" element={<Brides />} />
+              <Route path="/brides/:id" element={<BrideProfile />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/forms" element={<ReportsPage />} />
+              <Route path="/data" element={<WeddingsStatsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 
-// Main App component with all providers
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -80,7 +56,15 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <AppContent />
+          <BrowserRouter>
+            <Routes>
+              {/* 🔓 טופס ציבורי – נגיש ללא התחברות */}
+              <Route path="/measurements/:brideId/form" element={<PublicMeasurementForm />} />
+
+              {/* 🔐 ראוטים פנימיים של המערכת */}
+              <Route path="/*" element={<ProtectedRoutes />} />
+            </Routes>
+          </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
