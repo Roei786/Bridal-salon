@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, orderBy, Timestamp, DocumentData } from 'firebase/firestore';
-import { db } from '../firebase-config.ts';
+import { db } from '../firebase.ts';
 
 export interface Bride {
   id?: string;

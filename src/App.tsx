@@ -60,7 +60,7 @@ const App = () => {
             <Routes>
               {/* 🔓 טופס ציבורי – נגיש ללא התחברות */}
               <Route path="/measurements/:brideId/form" element={<PublicMeasurementForm />} />
-
+              <Route path="/login" element={<Login />} />
               {/* 🔐 ראוטים פנימיים של המערכת */}
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>

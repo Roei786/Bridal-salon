@@ -10,7 +10,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { collection, getDocs, Timestamp } from 'firebase/firestore';
-import { db } from '@/firebase-config'; // ודא שזה הנתיב לקובץ firebase שלך
+import { db } from '@/firebase'; // ודא שזה הנתיב לקובץ firebase שלך
 import SeamstressPieChart from './SeamstressPieChart';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 

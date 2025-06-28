@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, Timestamp, orderBy } from 'firebase/firestore';
-import { db } from '../firebase-config.ts';
+import { db } from '../firebase.ts';
 
 export interface Appointment {
   id?: string;

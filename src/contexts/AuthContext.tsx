@@ -7,7 +7,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail
 } from "firebase/auth";
-import { auth, db } from '../firebase-config.ts';
+import { auth, db } from '../firebase.ts';
 import { doc, getDoc } from "firebase/firestore";
 
 // Add user data type to include role and other fields

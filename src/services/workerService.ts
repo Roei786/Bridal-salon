@@ -1,5 +1,5 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../firebase-config.ts';
+import { db } from '../firebase.ts';
 
 export interface Worker {
   id?: string;

@@ -8,7 +8,7 @@ import {
   Title,
 } from 'chart.js';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase-config'; // ודא שזה הנתיב הנכון
+import { db } from '@/firebase'; // ודא שזה הנתיב הנכון
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
