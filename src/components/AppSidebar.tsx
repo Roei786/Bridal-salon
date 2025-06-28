@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
-import logo from '../../public/files/logo.png';
+import logo from '/public/files/logo.png'
 
 const AppSidebar = () => {
   const { logout, currentUser, userData } = useAuth();

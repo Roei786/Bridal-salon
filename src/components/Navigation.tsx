@@ -3,7 +3,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Crown, LayoutDashboard, Users, Calendar, BarChart3, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import logo from '../../public/files/logo.png'
+import logo from '/public/files/logo.png'
 const Navigation = () => {
   const { logout, currentUser } = useAuth();
   const navItems = [

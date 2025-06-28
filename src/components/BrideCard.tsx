@@ -2,18 +2,19 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Crown, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  DollarSign, 
-  User, 
-  Image, 
+import {
+  Crown,
+  Phone,
+  Mail,
+  Calendar,
+  DollarSign,
+  User,
+  Image,
   Scissors,
   ClipboardEdit,
   Trash2,
-  Ruler
+  Ruler,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Bride } from '@/services/brideService';
@@ -23,15 +24,23 @@ interface BrideCardProps {
   onEdit: (bride: Bride) => void;
   onDelete: (id: string) => void;
   onViewMeasurements: (bride: Bride) => void;
+  onViewBride: (bride: Bride) => void; // ✅ נוספה תמיכה בכפתור "הצג"
 }
 
-const BrideCard: React.FC<BrideCardProps> = ({ bride, onEdit, onDelete, onViewMeasurements }) => {
+const BrideCard: React.FC<BrideCardProps> = ({
+  bride,
+  onEdit,
+  onDelete,
+  onViewMeasurements,
+  onViewBride,
+}) => {
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="pb-3 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-bold text-gray-900">{bride.fullName}</CardTitle>
         <Crown className="h-5 w-5 text-pink-600" />
       </CardHeader>
+
       <CardContent className="space-y-4">
         {/* Contact Info */}
         <div className="space-y-2">
@@ -49,7 +58,12 @@ const BrideCard: React.FC<BrideCardProps> = ({ bride, onEdit, onDelete, onViewMe
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 text-pink-600 flex-shrink-0" />
           <span className="font-medium">תאריך חתונה:</span>
-          <span>{format(bride.weddingDate instanceof Date ? bride.weddingDate : new Date(), 'dd/MM/yyyy')}</span>
+          <span>
+            {format(
+              bride.weddingDate instanceof Date ? bride.weddingDate : new Date(),
+              'dd/MM/yyyy'
+            )}
+          </span>
         </div>
 
         {/* Assigned Seamstress */}
@@ -82,10 +96,14 @@ const BrideCard: React.FC<BrideCardProps> = ({ bride, onEdit, onDelete, onViewMe
             </span>
           </div>
           <div className="text-sm text-gray-500">
-            {format(bride.createdAt instanceof Date ? bride.createdAt : new Date(), 'dd/MM/yyyy')}
+            {format(
+              bride.createdAt instanceof Date ? bride.createdAt : new Date(),
+              'dd/MM/yyyy'
+            )}
           </div>
         </div>
       </CardContent>
+
       <CardFooter className="flex flex-col gap-3 border-t pt-4">
         <div className="flex justify-between w-full">
           <Button
@@ -98,15 +116,15 @@ const BrideCard: React.FC<BrideCardProps> = ({ bride, onEdit, onDelete, onViewMe
             מחק
           </Button>
           <Button
-            variant="outline"
+            className="bg-green-600 hover:bg-green-700 text-white"
             size="sm"
-            className="text-pink-600 border-pink-200 hover:bg-pink-50"
             onClick={() => onEdit(bride)}
           >
             <ClipboardEdit className="h-4 w-4 mr-1" />
             ערוך
           </Button>
         </div>
+
         <Button
           variant="outline"
           size="sm"
@@ -116,29 +134,58 @@ const BrideCard: React.FC<BrideCardProps> = ({ bride, onEdit, onDelete, onViewMe
           <Ruler className="h-4 w-4 mr-1" />
           מידות הכלה
         </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full text-gray-600 border-gray-200 hover:bg-gray-50"
+          onClick={() => onViewBride(bride)}
+        >
+          <Eye className="h-4 w-4 mr-1" />
+          הצג כרטיס כלה
+        </Button>
       </CardFooter>
     </Card>
   );
 };
 
-// Helper components for status badges
+// Status Badge
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case 'Completed':
-      return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">הושלם</Badge>;
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+          הושלם
+        </Badge>
+      );
     case 'In Progress':
-      return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">בתהליך</Badge>;
+      return (
+        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+          בתהליך
+        </Badge>
+      );
     case 'Cancelled':
-      return <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">בוטל</Badge>;
+      return (
+        <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">
+          בוטל
+        </Badge>
+      );
     default:
       return <Badge variant="outline" className="bg-gray-100">לא ידוע</Badge>;
   }
 };
 
+// Payment Badge
 const PaymentBadge = ({ paid }: { paid: boolean }) => {
-  return paid ? 
-    <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">שולם</Badge> : 
-    <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">ממתין לתשלום</Badge>;
+  return paid ? (
+    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+      שולם
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">
+      ממתין לתשלום
+    </Badge>
+  );
 };
 
 export default BrideCard;
