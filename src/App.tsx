@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+
 import AppSidebar from "./components/AppSidebar";
 import Dashboard from "./components/Dashboard";
 import Brides from "./components/Brides";
@@ -16,6 +17,7 @@ import WeddingsStatsPage from './components/data';
 import BrideProfile from "./components/brideProfile";
 import PublicMeasurementForm from "./components/PublicMeasurementForm";
 import EmployeeHoursPage from './components/EmployeeHoursPage';
+import UserAreaComponent from './components/UserArea'; // 👈 Import the component
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,9 @@ const ProtectedRoutes = () => {
             </Routes>
           </main>
         </SidebarInset>
+
+        {/* 👇 User drawer avatar visible on all protected pages */}
+        <UserAreaComponent />
       </div>
     </SidebarProvider>
   );
@@ -60,10 +65,10 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* 🔓 טופס ציבורי – נגיש ללא התחברות */}
+              {/* 🔓 Public form – accessible without login */}
               <Route path="/measurements/:brideId/form" element={<PublicMeasurementForm />} />
-              <Route path="/login" element={<Login />} />
-              {/* 🔐 ראוטים פנימיים של המערכת */}
+              <Route path="/login" element={<Login />} />
+              {/* 🔐 Protected routes */}
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>
           </BrowserRouter>
