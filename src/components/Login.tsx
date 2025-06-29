@@ -5,6 +5,7 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const { login, resetPassword } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +37,7 @@ const Login = () => {
 
     try {
       await login(email, password);
+      navigate('/'); // או '/dashboard' אם זה הנתיב שלך
     } catch (error) {
       setError('שם משתמש או סיסמה לא נכונים');
       setIsLoading(false);

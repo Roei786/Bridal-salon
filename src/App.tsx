@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import RegisterPage from './pages/RegisterPage';
+
 import AppSidebar from "./components/AppSidebar";
 import Dashboard from "./components/Dashboard";
 import Brides from "./components/Brides";
@@ -15,6 +17,8 @@ import ReportsPage from './components/forms';
 import WeddingsStatsPage from './components/data';
 import BrideProfile from "./components/brideProfile";
 import PublicMeasurementForm from "./components/PublicMeasurementForm";
+import EmployeeHoursPage from './components/EmployeeHoursPage.tsx';
+import UserAreaComponent from './components/UserArea'; // 👈 Import the component
 
 const queryClient = new QueryClient();
 
@@ -40,10 +44,14 @@ const ProtectedRoutes = () => {
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/forms" element={<ReportsPage />} />
               <Route path="/data" element={<WeddingsStatsPage />} />
+              <Route path="/employee-hours" element={<EmployeeHoursPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
         </SidebarInset>
+
+        {/* 👇 User drawer avatar visible on all protected pages */}
+        <UserAreaComponent />
       </div>
     </SidebarProvider>
   );
@@ -58,10 +66,11 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* 🔓 טופס ציבורי – נגיש ללא התחברות */}
+              {/* 🔓 Public form – accessible without login */}
               <Route path="/measurements/:brideId/form" element={<PublicMeasurementForm />} />
-
-              {/* 🔐 ראוטים פנימיים של המערכת */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register/:token" element={<RegisterPage />} />
+              {/* 🔐 Protected routes */}
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>
           </BrowserRouter>
