@@ -21,7 +21,6 @@ import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { updateBride } from '@/services/brideService';
 import { Bride } from '@/services/brideService';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { getActiveWorkers, Worker } from '@/services/workerService';
@@ -56,7 +55,6 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
     afterImages: []
   });
 
-  // Fetch active workers when dialog opens
   useEffect(() => {
     if (open) {
       const fetchWorkers = async () => {
@@ -68,28 +66,27 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
           console.error('Error fetching workers:', error);
           toast({
             title: 'שגיאה בטעינת רשימת תופרות',
-            description: 'לא ניתן לטעון את רשימת התופרות. אנא נסה שוב מאוחר יותר.',
+            description: 'לא ניתן לטעון את רשימת התופרות.',
             variant: 'destructive',
           });
         } finally {
           setLoadingWorkers(false);
         }
       };
-      
       fetchWorkers();
     }
   }, [open]);
 
-  // Update form data when bride changes
   useEffect(() => {
     if (bride) {
       setFormData({
         ...bride,
-        // Ensure dates are Date objects
-        weddingDate: bride.weddingDate instanceof Date ? bride.weddingDate : 
-                      (bride.weddingDate && 'toDate' in bride.weddingDate ? bride.weddingDate.toDate() : new Date()),
-        createdAt: bride.createdAt instanceof Date ? bride.createdAt : 
-                      (bride.createdAt && 'toDate' in bride.createdAt ? bride.createdAt.toDate() : new Date())
+        weddingDate: bride.weddingDate instanceof Date
+          ? bride.weddingDate
+          : ('toDate' in bride.weddingDate ? bride.weddingDate.toDate() : new Date()),
+        createdAt: bride.createdAt instanceof Date
+          ? bride.createdAt
+          : ('toDate' in bride.createdAt ? bride.createdAt.toDate() : new Date())
       });
     }
   }, [bride]);
@@ -107,17 +104,15 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation
     if (!formData.fullName || !formData.phoneNumber || !formData.email) {
       toast({
         title: 'שגיאה',
-        description: 'אנא מלא את כל השדות הנדרשים',
+        description: 'אנא מלאי את כל השדות הנדרשים',
         variant: 'destructive',
       });
       return;
     }
-    
+
     setLoading(true);
     try {
       if (formData.id) {
@@ -130,19 +125,20 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
           paymentStatus: formData.paymentStatus,
           assignedSeamstress: formData.assignedSeamstress,
         });
-        
+
         toast({
-          title: 'כלה עודכנה בהצלחה',
-          description: `הפרטים של ${formData.fullName} עודכנו במערכת`,
+          title: 'הצלחה',
+          description: `הפרטים של ${formData.fullName} עודכנו בהצלחה`,
         });
+
         onBrideUpdated();
         onOpenChange(false);
       }
     } catch (error) {
       console.error('Failed to update bride:', error);
       toast({
-        title: 'שגיאה בעדכון כלה',
-        description: 'אירעה שגיאה בעת הניסיון לעדכן את פרטי הכלה',
+        title: 'שגיאה',
+        description: 'לא הצלחנו לעדכן את פרטי הכלה',
         variant: 'destructive',
       });
     } finally {
@@ -156,137 +152,104 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>עריכת פרטי כלה</DialogTitle>
-          <DialogDescription>
-            עדכני את פרטי הכלה כאן. לחצי על שמור כשתסיימי.
-          </DialogDescription>
+          <DialogTitle>עריכת כלה</DialogTitle>
+          <DialogDescription>עדכני את הפרטים של הכלה</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">שם מלא</Label>
-              <Input 
-                id="fullName" 
+              <Input
+                id="fullName"
                 name="fullName"
-                placeholder="הכניסי שם מלא" 
                 value={formData.fullName}
                 onChange={handleInputChange}
                 className="text-right"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="email">דואר אלקטרוני</Label>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                placeholder="דוא״ל" 
+              <Label htmlFor="email">אימייל</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 className="text-right"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">מספר טלפון</Label>
-              <Input 
-                id="phoneNumber" 
-                name="phoneNumber" 
-                placeholder="מספר טלפון" 
+              <Label htmlFor="phoneNumber">טלפון</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 className="text-right"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="weddingDate">תאריך חתונה</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between text-right"
-                    id="weddingDate"
-                  >
-                    {formData.weddingDate ? (
-                      format(
-                        formData.weddingDate instanceof Date ? formData.weddingDate : 
-                          ('toDate' in formData.weddingDate ? formData.weddingDate.toDate() : new Date()),
-                        "P", 
-                        { locale: he }
-                      )
-                    ) : (
-                      <span>בחר תאריך חתונה</span>
-                    )}
+                  <Button variant="outline" className="w-full justify-between text-right">
+                    {formData.weddingDate
+                      ? format(formData.weddingDate, 'P', { locale: he })
+                      : 'בחרי תאריך'}
                     <CalendarIcon className="h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.weddingDate instanceof Date ? formData.weddingDate : 
-                      ('toDate' in formData.weddingDate ? formData.weddingDate.toDate() : new Date())}
+                    selected={formData.weddingDate}
                     onSelect={handleDateChange}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="historyStatus">סטטוס טיפול</Label>
-              <Select 
+              <select
                 value={formData.historyStatus}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, historyStatus: value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, historyStatus: e.target.value }))}
+                className="w-full border rounded p-2 text-right"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר סטטוס" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="In Progress">בתהליך</SelectItem>
-                  <SelectItem value="Completed">הושלם</SelectItem>
-                  <SelectItem value="Cancelled">בוטל</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="In Progress">בתהליך</option>
+                <option value="Completed">הושלם</option>
+                <option value="Cancelled">בוטל</option>
+              </select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="assignedSeamstress">תופרת אחראית</Label>
-              <Select 
-                value={formData.assignedSeamstress || ''}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, assignedSeamstress: value }))}
-              >
-                <SelectTrigger className="text-right">
-                  <SelectValue placeholder="בחר תופרת" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingWorkers ? (
-                    <div className="flex items-center justify-center p-2">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>טוען תופרות...</span>
-                    </div>
-                  ) : workers.length > 0 ? (
-                    workers.map((worker) => (
-                      <SelectItem key={worker.id} value={worker.fullName}>
-                        {worker.fullName}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="p-2 text-muted-foreground text-center text-sm">
-                      לא נמצאו תופרות
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+              <Input
+                list="seamstresses-list"
+                placeholder="בחרי או הזיני שם תופרת"
+                value={formData.assignedSeamstress}
+                onChange={(e) => setFormData(prev => ({ ...prev, assignedSeamstress: e.target.value }))}
+                className="text-right"
+              />
+              <datalist id="seamstresses-list">
+                {workers.map((worker) => (
+                  <option key={worker.id} value={worker.fullName} />
+                ))}
+              </datalist>
             </div>
 
             <div className="flex items-center justify-between">
               <Label htmlFor="paymentStatus">תשלום בוצע?</Label>
-              <Switch 
-                id="paymentStatus" 
+              <Switch
+                id="paymentStatus"
                 checked={formData.paymentStatus}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, paymentStatus: checked }))}
+                onCheckedChange={(checked) =>
+                  setFormData(prev => ({ ...prev, paymentStatus: checked }))
+                }
               />
             </div>
           </div>
@@ -295,7 +258,7 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               ביטול
             </Button>
-            <Button type="submit" disabled={loading} className='text-white'>
+            <Button type="submit" disabled={loading} className="text-white">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

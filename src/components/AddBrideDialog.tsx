@@ -24,7 +24,9 @@ import { Bride } from '@/services/brideService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
-import { getActiveWorkers, Worker } from '@/services/workerService';
+import { getActiveWorkers, Worker, addWorkerIfNotExists } from '@/services/workerService';
+
+
 
 interface AddBrideDialogProps {
   open: boolean;
@@ -87,24 +89,27 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation
+
     if (!formData.fullName || !formData.phoneNumber || !formData.email) {
       toast({
         title: 'שגיאה',
-        description: 'אנא מלא את כל השדות הנדרשים',
+        description: 'אנא מלאי את כל השדות הנדרשים',
         variant: 'destructive',
       });
       return;
     }
-    
+
     setLoading(true);
     try {
+      if (formData.assignedSeamstress) {
+        await addWorkerIfNotExists(formData.assignedSeamstress);
+      }
       await addBride(formData);
       toast({
         title: 'כלה נוספה בהצלחה',
         description: `${formData.fullName} נוספה למערכת`,
       });
+
       onBrideAdded();
       onOpenChange(false);
       // Reset form
@@ -228,32 +233,32 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="assignedSeamstress">תופרת אחראית</Label>
-              <Select 
-                value={formData.assignedSeamstress}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, assignedSeamstress: value }))}
-              >
-                <SelectTrigger className="text-right">
-                  <SelectValue placeholder="בחר תופרת" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingWorkers ? (
-                    <div className="flex items-center justify-center p-2">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      <span>טוען תופרות...</span>
-                    </div>
-                  ) : workers.length > 0 ? (
-                    workers.map((worker) => (
-                      <SelectItem key={worker.id} value={worker.fullName}>
-                        {worker.fullName}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="p-2 text-muted-foreground text-center text-sm">
-                      לא נמצאו תופרות
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
+              {loadingWorkers ? (
+                <div className="flex items-center justify-center p-2">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span>טוען תופרות...</span>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    list="seamstresses-list"
+                    placeholder="בחרי או הזיני שם תופרת"
+                    value={formData.assignedSeamstress}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        assignedSeamstress: e.target.value,
+                      }))
+                    }
+                    className="text-right"
+                  />
+                  <datalist id="seamstresses-list">
+                    {workers.map((worker) => (
+                      <option key={worker.id} value={worker.fullName} />
+                    ))}
+                  </datalist>
+                </>
+              )}
             </div>
 
             <div className="flex items-center justify-between">

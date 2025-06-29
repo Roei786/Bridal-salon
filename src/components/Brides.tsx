@@ -1,3 +1,4 @@
+// בקובץ Brides.tsx (שלם עם שדרוגים)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import DeleteBrideDialog from '@/components/DeleteBrideDialog';
 import BrideMeasurementsDialog from '@/components/BrideMeasurementsDialog';
 import BrideCard from './BrideCard';
 import { useToast } from '@/components/ui/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Brides = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +24,7 @@ const Brides = () => {
   const [measurementsDialogOpen, setMeasurementsDialogOpen] = useState(false);
   const [selectedBride, setSelectedBride] = useState<Bride | null>(null);
   const [viewType, setViewType] = useState<'cards' | 'table'>('cards');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'In Progress' | 'Completed'>('all');
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -71,12 +74,16 @@ const Brides = () => {
     navigate(`/brides/${bride.id}`);
   };
 
-  const filteredBrides = brides.filter(bride =>
-    bride.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bride.phoneNumber.includes(searchTerm) ||
-    bride.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bride.assignedSeamstress?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBrides = brides
+    .filter(bride =>
+      bride.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bride.phoneNumber.includes(searchTerm) ||
+      bride.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bride.assignedSeamstress?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(bride =>
+      statusFilter === 'all' ? true : bride.historyStatus === statusFilter
+    );
 
   return (
     <div className="p-6 space-y-6">
@@ -102,6 +109,26 @@ const Brides = () => {
             <Plus className="h-4 w-4 ml-2" />
             הוסף כלה חדשה
           </Button>
+        </div>
+      </div>
+
+      {/* Filters: Count + Status */}
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-muted-foreground">
+          נמצאו {filteredBrides.length} כלות
+        </span>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-700">סינון לפי סטטוס:</label>
+          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as typeof statusFilter)}>
+            <SelectTrigger className="w-36 text-right">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">הכל</SelectItem>
+              <SelectItem value="In Progress">בתהליך</SelectItem>
+              <SelectItem value="Completed">הושלם</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -201,7 +228,6 @@ const Brides = () => {
   );
 };
 
-// Helper components
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case 'Completed':
