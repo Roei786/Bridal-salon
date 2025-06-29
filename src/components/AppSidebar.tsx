@@ -1,4 +1,4 @@
-// קובץ: AppSidebar.tsx - גרסה נקייה ללא כפתור "דף הבית"
+// קובץ: AppSidebar.tsx - גרסה עם פונטים מוגדלים ואלמנטים תחת SidebarFooter
 
 import React, { useEffect, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
@@ -98,9 +98,9 @@ const AppSidebar = () => {
             <img src={logo} alt="הודיה לוגו" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">הודיה</h1>
-            <p className="text-sm text-amber-700">סלון כלות חברתי</p>
-            <p className="text-xs text-gray-400 mt-1">ליום שכולו את ✨</p>
+            <h1 className="text-2xl font-bold text-gray-900">הודיה</h1>
+            <p className="text-base text-amber-700">סלון כלות חברתי</p>
+            <p className="text-sm text-gray-400 mt-1">ליום שכולו את ✨</p>
           </div>
         </Link>
       </SidebarHeader>
@@ -115,14 +115,14 @@ const AppSidebar = () => {
                     <NavLink
                       to={item.to}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-all duration-200 ${
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-all duration-200 text-base ${
                           isActive
                             ? 'bg-amber-100 text-amber-900 font-semibold shadow-inner'
                             : 'text-gray-600 hover:bg-amber-50 hover:text-gray-900'
                         }`
                     }
                     >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className="h-6 w-6 flex-shrink-0" />
                       <span className="truncate">{item.label}</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -133,76 +133,59 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-amber-200">
+      <SidebarFooter className="p-4 border-t border-amber-200 space-y-4">
+        {/* שעון נוכחות */}
         {currentUser && (
-          <div className="mb-4">
-            <Card className="bg-amber-50/50 border-amber-200">
-              <CardHeader className="pb-2 pt-2.5 px-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                  <Clock className="h-4 w-4 text-amber-700" /> שעון נוכחות
-                </CardTitle>
-                <CardDescription className="text-xs pt-0.5">
-                  {isClockedIn && shiftStartTime
-                    ? `נכנסת ב-${shiftStartTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
-                    : 'מחוץ למשמרת'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 px-3 pb-3">
-                <div className="text-center mb-2.5">
-                  <p className="text-2xl font-bold font-mono text-gray-800 leading-tight">
-                    {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {currentTime.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={handleClockIn}
-                    disabled={isClockedIn || isProcessingClockAction}
-                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white flex-1 h-8"
-                  >
-                    {isProcessingClockAction && !isClockedIn
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <LogIn className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleClockOut}
-                    disabled={!isClockedIn || isProcessingClockAction}
-                    className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white flex-1 h-8"
-                  >
-                    {isProcessingClockAction && isClockedIn
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <LogOut className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="bg-amber-50/50 border-amber-200">
+            <CardHeader className="pb-2 pt-2.5 px-3">
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
+                <Clock className="h-4 w-4 text-amber-700" /> שעון נוכחות
+              </CardTitle>
+              <CardDescription className="text-sm pt-0.5">
+                {isClockedIn && shiftStartTime
+                  ? `נכנסת ב-${shiftStartTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`
+                  : 'מחוץ למשמרת'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0 px-3 pb-3">
+              <div className="text-center mb-2.5">
+                <p className="text-2xl font-bold font-mono text-gray-800 leading-tight">
+                  {currentTime.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {currentTime.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleClockIn} disabled={isClockedIn || isProcessingClockAction} className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white flex-1 h-8">
+                  {isProcessingClockAction && !isClockedIn ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
+                </Button>
+                <Button size="sm" onClick={handleClockOut} disabled={!isClockedIn || isProcessingClockAction} className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white flex-1 h-8">
+                  {isProcessingClockAction && isClockedIn ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        <div className="text-center mb-4">
+        {/* תמונת כלה */}
+        <div className="text-center">
           <img
             src="/bride-avatar.jpg"
             alt="תמונת כלה"
             className="w-20 h-20 rounded-full object-cover mx-auto shadow-lg border-2 border-amber-100"
           />
-          <p className="text-xs text-amber-700 mt-2">תמונה מתוך הסלון</p>
+          <p className="text-sm text-amber-700 mt-2">תמונה מתוך הסלון</p>
         </div>
 
+        {/* פרטי משתמש וכפתור יציאה */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
             <Users className="h-5 w-5 text-amber-600" />
           </div>
           <div className="truncate flex-1">
-            <p className="font-semibold text-gray-800 truncate">
-              {userData?.fullName || currentUser?.displayName || 'משתמש'}
-            </p>
-            <p className="text-sm text-gray-500 truncate">
-              {userData?.email || currentUser?.email}
-            </p>
+            <p className="font-semibold text-gray-800 truncate text-base">{userData?.fullName || currentUser?.displayName || 'משתמש'}</p>
+            <p className="text-sm text-gray-500 truncate">{userData?.email || currentUser?.email}</p>
           </div>
           <SidebarMenuButton
             onClick={logout}
@@ -218,3 +201,4 @@ const AppSidebar = () => {
 };
 
 export default AppSidebar;
+

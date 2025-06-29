@@ -333,8 +333,8 @@ const Dashboard = () => {
       <div className="p-6">
         <div className="text-center py-12">
           <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold text-gray-900 mb-2">נדרשת התחברות</h3>
-          <p className="text-gray-600 mb-6">יש להתחבר למערכת כדי לראות את לוח המחוונים.</p>
+          <h3 className="text-3xl font-semibold text-gray-900 mb-2">נדרשת התחברות</h3>
+          <p className="text-xl text-gray-600 mb-6">יש להתחבר למערכת כדי לראות את לוח המחוונים.</p>
           <Link to="/login">
             <Button className="bg-amber-600 hover:bg-amber-700 text-white">
               עבור להתחברות
@@ -513,8 +513,8 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="text-lg font-medium text-gray-600 mb-1">{stat.title}</p>
+                  <p className="text-4xl font-bold text-gray-900">{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-full ${stat.bgColor}`}>
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
