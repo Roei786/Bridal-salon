@@ -178,7 +178,6 @@ const Brides = () => {
                 onDelete={handleDeleteBride}
                 onViewMeasurements={handleViewMeasurements}
                 onViewBride={handleViewBride}
-                editButtonClass="bg-green-600 hover:bg-green-700 text-white"
               />
             ))}
           </div>
