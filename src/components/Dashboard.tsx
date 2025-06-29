@@ -356,7 +356,7 @@ const Dashboard = () => {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           color: 'white', // Ensure text is visible over the image
-          textShadow: '2px 2px 4px rgba(0,0,0,0.7)', // Add text shadow for better readability
+          textShadow: '4px 4px 4px rgba(0,0,0,0.7)', // Add text shadow for better readability
           minHeight: '200px', // Ensure enough height for the background image to show
           display: 'flex',
           flexDirection: 'column',
