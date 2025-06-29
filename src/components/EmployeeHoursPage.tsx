@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getAllUsers } from '@/services/shiftService';
-import UserShiftsDetail from '@/components/UserShiftsDetail';
+import UserShiftsDetail from '@/components/UserShiftsDetail.tsx';
 import AddUserForm from '@/components/AddUserForm';
 import { Loader2, Users, UserPlus, ShieldCheck } from 'lucide-react';
 import Avatar from '@mui/material/Avatar';
