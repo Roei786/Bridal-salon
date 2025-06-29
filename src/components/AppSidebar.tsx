@@ -123,7 +123,7 @@ const AppSidebar = () => {
                     }
                     >
                       <item.icon className="h-6 w-6 flex-shrink-0" />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate text-lg">{item.label}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
