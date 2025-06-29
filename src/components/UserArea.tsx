@@ -206,37 +206,76 @@ const UserAreaComponent = () => {
       </Drawer>
 
       <Dialog open={dialogOpen} onClose={closeDialog} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 'bold', color: '#78350f' }}>
-          המשמרות שלי החודש
-        </DialogTitle>
-        <DialogContent dividers>
-          {userShifts.length > 0 ? (
-            <List>
-              {userShifts.map((shift, index) => (
-                <ListItem key={index} divider>
-                  <ListItemText
-                    primary={`תאריך: ${shift.date}`}
-                    secondary={
-                      shift.clockInTime && shift.clockOutTime
-                        ? `שעות: ${format(new Date(shift.clockInTime.seconds * 1000), 'HH:mm')} - ${format(new Date(shift.clockOutTime.seconds * 1000), 'HH:mm')}`
-                        : 'משמרת פעילה'
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              אין משמרות החודש.
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog} color="primary">
-            סגור
-          </Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle
+    sx={{
+      fontWeight: 'bold',
+      color: '#78350f',
+      textAlign: 'center',
+      fontFamily: "'Varela Round', sans-serif",
+    }}
+  >
+    המשמרות שלי החודש
+  </DialogTitle>
+  <DialogContent
+    dividers
+    sx={{
+      fontFamily: "'Varela Round', sans-serif",
+      textAlign: 'center',
+    }}
+  >
+    {userShifts.length > 0 ? (
+      <List>
+        {userShifts.map((shift, index) => (
+          <ListItem key={index} divider sx={{ justifyContent: 'center' }}>
+            <ListItemText
+              primaryTypographyProps={{
+                sx: { fontWeight: 'bold', fontFamily: "'Varela Round', sans-serif", textAlign: 'center' },
+              }}
+              secondaryTypographyProps={{
+                sx: { fontWeight: 'bold', fontFamily: "'Varela Round', sans-serif", textAlign: 'center' },
+              }}
+              primary={`תאריך: ${shift.date}`}
+             secondary={
+  shift.clockInTime && shift.clockOutTime
+    ? (() => {
+        const clockIn = new Date(shift.clockInTime.seconds * 1000);
+        const clockOut = new Date(shift.clockOutTime.seconds * 1000);
+        const diffInMs = clockOut.getTime() - clockIn.getTime();
+        const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        return `שעות: ${format(clockIn, 'HH:mm')} - ${format(clockOut, 'HH:mm')} | משך: ${hours}:${minutes
+          .toString()
+          .padStart(2, '0')} שעות`;
+      })()
+    : 'משמרת פעילה'
+}
+
+            />
+          </ListItem>
+        ))}
+      </List>
+    ) : (
+      <Typography
+        variant="body2"
+        color="textSecondary"
+        sx={{ fontFamily: "'Varela Round', sans-serif", mt: 2 }}
+      >
+        אין משמרות החודש.
+      </Typography>
+    )}
+  </DialogContent>
+  <DialogActions sx={{ justifyContent: 'center' }}>
+    <Button
+      onClick={closeDialog}
+      color="primary"
+      sx={{ fontFamily: "'Varela Round', sans-serif", fontWeight: 'bold' }}
+    >
+      סגור
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </>
   );
 };
