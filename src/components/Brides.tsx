@@ -1,4 +1,4 @@
-// בקובץ Brides.tsx (שלם עם שדרוגים)
+// src/components/Brides.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -71,7 +71,7 @@ const Brides = () => {
   };
 
   const handleViewBride = (bride: Bride) => {
-    navigate(`/brides/${bride.id}`);
+    navigate(`/brides/${bride.id}`)
   };
 
   const filteredBrides = brides

@@ -96,7 +96,7 @@ const WeddingsStatsPage = () => {
       },
       title: {
         display: true,
-        text: מספר חתונות לפי חודש בשנת ${selectedYear},
+        text:`מספר חתונות לפי חודש בשנת ${selectedYear}`,
         font: { size: 24, weight: 'bold' },
       },
       datalabels: {

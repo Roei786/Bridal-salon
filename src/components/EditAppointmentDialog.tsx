@@ -165,7 +165,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="brideId">בחר כלה</Label>
-              <Select 
+              <Select
                 value={formData.brideId}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, brideId: value }))}
               >
@@ -212,7 +212,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="time">שעת תור</Label>
-              <Select 
+              <Select
                 value={selectedTime}
                 onValueChange={handleTimeChange}
               >
@@ -236,7 +236,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="type">סוג תור</Label>
-              <Select 
+              <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
               >
@@ -271,7 +271,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="notes">הערות</Label>
-              <Textarea 
+              <Textarea
                 id="notes"
                 placeholder="הכנס הערות לתור"
                 value={formData.notes}

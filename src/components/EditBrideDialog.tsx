@@ -1,131 +1,113 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { updateDoc, doc, getDocs, collection, addDoc, query, where } from 'firebase/firestore';
-import { db } from '@/firebase';
-import { useToast } from '@/components/ui/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
+import { Bride, updateBride } from '@/services/brideService';
+import { addWorkerIfNotExists } from '@/services/workerService';;
+import { Worker } from '@/types';
 
-interface EditBrideDialogProps {
-  bride: any;
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: () => void;
+export interface EditBrideDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onBrideUpdated: () => Promise<void>;
+  bride: Bride | null;
 }
 
-const EditBrideDialog: React.FC<EditBrideDialogProps> = ({ bride, isOpen, onClose, onSave }) => {
-  const [formData, setFormData] = useState(bride);
-  const [workers, setWorkers] = useState<any[]>([]);
-  const [loadingWorkers, setLoadingWorkers] = useState(false);
-  const { toast } = useToast();
+const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
+  open,
+  onOpenChange,
+  onBrideUpdated,
+  bride
+}) => {
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [assignedSeamstress, setAssignedSeamstress] = useState('');
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
   useEffect(() => {
-    setFormData(bride);
+    if (bride) {
+      setFullName(bride.fullName || '');
+      setPhoneNumber(bride.phoneNumber || '');
+      setEmail(bride.email || '');
+      setAssignedSeamstress(bride.assignedSeamstress || '');
+    }
   }, [bride]);
 
   useEffect(() => {
     const fetchWorkers = async () => {
-      setLoadingWorkers(true);
       try {
-        const workersSnapshot = await getDocs(collection(db, 'workers'));
-        const workersList = workersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const workersList = await getWorkers();
         setWorkers(workersList);
       } catch (error) {
-        console.error('Error fetching workers:', error);
-      } finally {
-        setLoadingWorkers(false);
+        console.error('Failed to fetch workers:', error);
       }
     };
-
     fetchWorkers();
   }, []);
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
+    if (!bride) return;
+
+    const updatedBride: Bride = {
+      ...bride,
+      fullName,
+      phoneNumber,
+      email,
+      assignedSeamstress
+    };
+
+    if (assignedSeamstress && !workers.some(w => w.name === assignedSeamstress)) {
+      await addWorker({ name: assignedSeamstress });
+    }
+
     try {
-      const brideRef = doc(db, 'Brides', bride.id);
-
-      // אם תופרת חדשה - נוסיף לקולקשן workers
-      const seamstressExists = workers.some(w => w.fullName === formData.assignedSeamstress);
-      if (formData.assignedSeamstress && !seamstressExists) {
-        await addDoc(collection(db, 'workers'), {
-          fullName: formData.assignedSeamstress
-        });
-      }
-
-      await updateDoc(brideRef, formData);
-      toast({ title: 'הכלה עודכנה בהצלחה 🎉' });
-      onSave();
-      onClose();
+      await updateBride(updatedBride.id, updatedBride);
+      await onBrideUpdated();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error updating bride:', error);
-      toast({ title: 'שגיאה בעדכון הכלה', description: 'נסי שוב מאוחר יותר', variant: 'destructive' });
     }
   };
 
-  if (!formData) return null;
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>עריכת כלה</DialogTitle>
+          <DialogTitle>עריכת פרטי כלה</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="fullName">שם מלא</Label>
-            <Input
-              id="fullName"
-              value={formData.fullName || ''}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            />
+            <Label>שם מלא</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
-
           <div>
-            <Label htmlFor="phoneNumber">טלפון</Label>
-            <Input
-              id="phoneNumber"
-              value={formData.phoneNumber || ''}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-            />
+            <Label>מספר טלפון</Label>
+            <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
           </div>
-
           <div>
-            <Label htmlFor="email">אימייל</Label>
-            <Input
-              id="email"
-              value={formData.email || ''}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
+            <Label>אימייל</Label>
+            <Input value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-
           <div>
-            <Label htmlFor="assignedSeamstress">תופרת אחראית</Label>
+            <Label>תופרת</Label>
             <Input
-              list="seamstresses-list"
-              placeholder="בחרי או הזיני שם תופרת"
-              value={formData.assignedSeamstress || ''}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, assignedSeamstress: e.target.value }))
-              }
-              className="text-right"
+              list="seamstress-list"
+              value={assignedSeamstress}
+              onChange={(e) => setAssignedSeamstress(e.target.value)}
             />
-            <datalist id="seamstresses-list">
+            <datalist id="seamstress-list">
               {workers.map((worker) => (
-                <option key={worker.id} value={worker.fullName} />
+                <option key={worker.name} value={worker.name} />
               ))}
             </datalist>
           </div>
 
-          <div className="flex justify-end mt-4 gap-2">
-            <Button variant="outline" onClick={onClose}>ביטול</Button>
-            <Button onClick={handleSave} className="bg-green-600 text-white hover:bg-green-700">
-              שמירה
-            </Button>
-          </div>
+          <Button onClick={handleSubmit} className="bg-green-600 text-white hover:bg-green-700">
+            שמור שינויים
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
