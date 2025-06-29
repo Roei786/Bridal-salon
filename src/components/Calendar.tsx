@@ -299,16 +299,17 @@ const Calendar = () => {
                               {day}
                             </div>
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-4 w-4 opacity-0 group-hover:opacity-100 hover:bg-pink-50"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddAppointment(day);
-                              }}
-                            >
-                              <Plus className="h-3 w-3 text-pink-600" />
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 hover:bg-pink-50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddAppointment(day);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 text-pink-600" />
                             </Button>
+
                           </div>
                           <div className="space-y-1">
                             {dayAppointments.slice(0, 2).map((apt) => {
