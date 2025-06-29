@@ -100,7 +100,7 @@ const AppSidebar = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">הודיה</h1>
             <p className="text-base text-amber-700">סלון כלות חברתי</p>
-            <p className="text-sm text-gray-400 mt-1">ליום שכולו את ✨</p>
+            <p className="text-sm text-gray-400 mt-1"></p>
           </div>
         </Link>
       </SidebarHeader>
