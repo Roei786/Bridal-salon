@@ -1,27 +1,24 @@
-// קובץ: AppSidebar.tsx - הגרסה הסופית כולל התמונה
+// קובץ: AppSidebar.tsx - גרסה נקייה ללא כפתור "דף הבית"
 
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Crown, LayoutDashboard, Users, Calendar, LogOut, ShieldCheck, Clock, LogIn, Loader2, FileText, Briefcase } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
+import {
+  Crown, LayoutDashboard, Users, Calendar, LogOut, Clock, LogIn,
+  Loader2, FileText, Briefcase
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
+  SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card, CardContent, CardHeader, CardTitle, CardDescription
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 import logo from '/files/logo.png';
 
 const AppSidebar = () => {
-  // --- כל הלוגיקה שלנו נשארת כאן ---
   const { logout, currentUser, userData } = useAuth();
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [shiftStartTime, setShiftStartTime] = useState<Date | null>(null);
@@ -30,7 +27,7 @@ const AppSidebar = () => {
   const [isProcessingClockAction, setIsProcessingClockAction] = useState(false);
 
   const getNavItems = () => {
-    const baseItems = [
+    const base = [
       { to: '/', label: 'לוח מחוונים', icon: LayoutDashboard },
       { to: '/brides', label: 'ניהול כלות', icon: Crown },
       { to: '/calendar', label: 'לוח זמנים', icon: Calendar },
@@ -38,56 +35,41 @@ const AppSidebar = () => {
       { to: '/data', label: 'נתונים', icon: FileText },
     ];
     if (userData?.role === 'manager') {
-      baseItems.push({ to: '/employee-hours', label: 'ניהול עובדים', icon: Briefcase });
+      base.push({ to: '/employee-hours', label: 'ניהול עובדים', icon: Briefcase });
     }
-    return baseItems;
+    return base;
   };
-  const navItems = getNavItems();
 
   useEffect(() => {
-    const timerId = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timerId);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    const checkActiveShift = async () => {
-      if (!currentUser) {
-        setIsClockedIn(false);
-        setShiftStartTime(null);
-        setActiveShiftId(null);
-        return;
-      }
+    const fetchShift = async () => {
+      if (!currentUser) return;
       try {
-        const activeShift = await getActiveShift(currentUser.uid);
-        if (activeShift) {
+        const shift = await getActiveShift(currentUser.uid);
+        if (shift) {
           setIsClockedIn(true);
-          setShiftStartTime(activeShift.clockInTime);
-          setActiveShiftId(activeShift.id);
-        } else {
-          setIsClockedIn(false);
-          setShiftStartTime(null);
-          setActiveShiftId(null);
+          setShiftStartTime(shift.clockInTime);
+          setActiveShiftId(shift.id);
         }
-      } catch (error) {
-        console.error('Error fetching active shift:', error);
-        setIsClockedIn(false);
-        setShiftStartTime(null);
-        setActiveShiftId(null);
+      } catch (e) {
+        console.error('Shift error:', e);
       }
     };
-    checkActiveShift();
+    fetchShift();
   }, [currentUser]);
 
   const handleClockIn = async () => {
     if (!currentUser) return;
     setIsProcessingClockAction(true);
     try {
-      const newShiftId = await clockIn(currentUser.uid, userData?.fullName);
-      setActiveShiftId(newShiftId);
+      const id = await clockIn(currentUser.uid, userData?.fullName);
+      setActiveShiftId(id);
       setIsClockedIn(true);
       setShiftStartTime(new Date());
-    } catch (error) {
-      console.error('Error clocking in:', error);
     } finally {
       setIsProcessingClockAction(false);
     }
@@ -101,19 +83,17 @@ const AppSidebar = () => {
       setIsClockedIn(false);
       setShiftStartTime(null);
       setActiveShiftId(null);
-    } catch (error) {
-      console.error('Error clocking out:', error);
     } finally {
       setIsProcessingClockAction(false);
     }
   };
-  // --- סוף אזור הלוגיקה ---
+
+  const navItems = getNavItems();
 
   return (
     <Sidebar side="right" className="w-[270px] border-l border-amber-200 bg-white">
       <SidebarHeader className="p-6 border-b border-amber-200">
-        {/* ... Header נשאר זהה ... */}
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-lg shadow-lg flex-shrink-0">
             <img src={logo} alt="הודיה לוגו" className="w-full h-full object-contain" />
           </div>
@@ -122,11 +102,10 @@ const AppSidebar = () => {
             <p className="text-sm text-amber-700">סלון כלות חברתי</p>
             <p className="text-xs text-gray-400 mt-1">ליום שכולו את ✨</p>
           </div>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 360px)' }}>
-        {/* ... SidebarContent נשאר זהה ... */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2 my-4 px-4">
@@ -141,7 +120,7 @@ const AppSidebar = () => {
                             ? 'bg-amber-100 text-amber-900 font-semibold shadow-inner'
                             : 'text-gray-600 hover:bg-amber-50 hover:text-gray-900'
                         }`
-                      }
+                    }
                     >
                       <item.icon className="h-5 w-5 flex-shrink-0" />
                       <span className="truncate">{item.label}</span>
@@ -157,7 +136,6 @@ const AppSidebar = () => {
       <SidebarFooter className="p-4 border-t border-amber-200">
         {currentUser && (
           <div className="mb-4">
-            {/* ... Card של שעון הנוכחות נשאר זהה ... */}
             <Card className="bg-amber-50/50 border-amber-200">
               <CardHeader className="pb-2 pt-2.5 px-3">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">
@@ -179,11 +157,25 @@ const AppSidebar = () => {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleClockIn} disabled={isClockedIn || isProcessingClockAction} className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white flex-1 h-8">
-                    {isProcessingClockAction && !isClockedIn ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
+                  <Button
+                    size="sm"
+                    onClick={handleClockIn}
+                    disabled={isClockedIn || isProcessingClockAction}
+                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white flex-1 h-8"
+                  >
+                    {isProcessingClockAction && !isClockedIn
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <LogIn className="h-4 w-4" />}
                   </Button>
-                  <Button size="sm" onClick={handleClockOut} disabled={!isClockedIn || isProcessingClockAction} className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white flex-1 h-8">
-                    {isProcessingClockAction && isClockedIn ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                  <Button
+                    size="sm"
+                    onClick={handleClockOut}
+                    disabled={!isClockedIn || isProcessingClockAction}
+                    className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white flex-1 h-8"
+                  >
+                    {isProcessingClockAction && isClockedIn
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <LogOut className="h-4 w-4" />}
                   </Button>
                 </div>
               </CardContent>
@@ -191,33 +183,34 @@ const AppSidebar = () => {
           </div>
         )}
 
-        {/* --- התיקון: החזרת קטע התמונה החסר --- */}
         <div className="text-center mb-4">
           <img
-            src="public/bride-avatar.jpg"
+            src="/bride-avatar.jpg"
             alt="תמונת כלה"
             className="w-20 h-20 rounded-full object-cover mx-auto shadow-lg border-2 border-amber-100"
           />
           <p className="text-xs text-amber-700 mt-2">תמונה מתוך הסלון</p>
         </div>
-        {/* --- סוף התיקון --- */}
 
         <div className="flex items-center gap-3">
-            {/* ... פרטי המשתמש וכפתור היציאה נשארים זהים ... */}
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Users className="h-5 w-5 text-amber-600" />
-            </div>
-            <div className="truncate flex-1">
-                <p className="font-semibold text-gray-800 truncate">{userData?.fullName || currentUser?.displayName || 'משתמש'}</p>
-                <p className="text-sm text-gray-500 truncate">{userData?.email || currentUser?.email}</p>
-            </div>
-            <SidebarMenuButton
-                onClick={logout}
-                className="text-gray-500 hover:text-red-600 hover:bg-red-50 p-2 rounded-full"
-                title="יציאה"
-            >
-                <LogOut className="h-5 w-5" />
-            </SidebarMenuButton>
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <Users className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="truncate flex-1">
+            <p className="font-semibold text-gray-800 truncate">
+              {userData?.fullName || currentUser?.displayName || 'משתמש'}
+            </p>
+            <p className="text-sm text-gray-500 truncate">
+              {userData?.email || currentUser?.email}
+            </p>
+          </div>
+          <SidebarMenuButton
+            onClick={logout}
+            className="text-gray-500 hover:text-red-600 hover:bg-red-50 p-2 rounded-full"
+            title="יציאה"
+          >
+            <LogOut className="h-5 w-5" />
+          </SidebarMenuButton>
         </div>
       </SidebarFooter>
     </Sidebar>
