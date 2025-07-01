@@ -4,8 +4,13 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { Bride, updateBride } from '@/services/brideService';
-import { addWorkerIfNotExists } from '@/services/workerService';;
-import { Worker } from '@/types';
+import { addWorkerIfNotExists } from '@/services/workerService';
+import { getActiveWorkers } from '@/services/workerService';
+
+// Define Worker type locally if not exported from '@/types'
+type Worker = {
+  name: string;
+};
 
 export interface EditBrideDialogProps {
   open: boolean;

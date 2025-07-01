@@ -1,4 +1,4 @@
-
+// appointment-details-dialog.tsx
 import React from 'react';
 import {
   Dialog,
@@ -9,11 +9,13 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Crown, Calendar, Clock, FileText, Tag } from 'lucide-react';
+import { Edit, Trash2, Crown, Calendar, Clock, FileText, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Appointment } from '@/services/appointmentService';
 import { convertToDate } from '@/utils/dateUtils';
+import { deleteAppointment } from '@/services/appointmentService';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AppointmentWithBride extends Appointment {
   brideName?: string;
@@ -24,6 +26,7 @@ interface AppointmentDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
   appointment: AppointmentWithBride | null;
   onEdit: (appointment: AppointmentWithBride) => void;
+  onDelete: () => void;
 }
 
 const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
@@ -31,10 +34,34 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
   onOpenChange,
   appointment,
   onEdit,
+  onDelete,
 }) => {
+  const { toast } = useToast();
+
   if (!appointment) return null;
 
   const appointmentDate = convertToDate(appointment.date);
+
+  const handleDelete = async () => {
+    if (!appointment?.id || !appointment?.brideId) return;
+
+    const confirmed = window.confirm("האם את בטוחה שברצונך למחוק את התור?");
+    if (!confirmed) return;
+
+    try {
+      await deleteAppointment(appointment.id, appointment.brideId);
+      toast({ title: "התור נמחק בהצלחה" });
+      onOpenChange(false); // סגור את הדיאלוג
+      onDelete(); // טען מחדש את התצוגה
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      toast({
+          title: "שגיאה במחיקת פגישה",
+          description: error instanceof Error ? error.message : "נסי שוב או פני למנהלת המערכת",
+          variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,7 +82,7 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Bride Information */}
+          {/* Bride Info */}
           <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
             <Crown className="h-5 w-5 text-amber-600" />
             <div>
@@ -66,7 +93,6 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
 
           {/* Appointment Details */}
           <div className="space-y-3">
-            {/* Date */}
             <div className="flex items-start gap-3">
               <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
@@ -77,7 +103,6 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
               </div>
             </div>
 
-            {/* Time */}
             <div className="flex items-start gap-3">
               <Clock className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
@@ -88,7 +113,6 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
               </div>
             </div>
 
-            {/* Type */}
             <div className="flex items-start gap-3">
               <Tag className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
@@ -99,7 +123,6 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
               </div>
             </div>
 
-            {/* Notes */}
             {appointment.notes && (
               <div className="flex items-start gap-3">
                 <FileText className="h-5 w-5 text-gray-500 mt-0.5" />
@@ -113,7 +136,16 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
             )}
           </div>
 
-          <div className="flex justify-end pt-4">
+          {/* Action Buttons */}
+          <div className="flex justify-end pt-4 gap-2">
+            <Button 
+              variant="destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              מחק תור
+            </Button>
+
             <Button 
               onClick={() => onEdit(appointment)} 
               className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white"

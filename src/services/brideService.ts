@@ -80,13 +80,12 @@ export const getBrideById = async (id: string): Promise<Bride | null> => {
 };
 
 // Add a new bride
-export const addBride = async (bride: Omit<Bride, 'id'>): Promise<string> => {
+export const addBride = async (brideData: Omit<Bride, 'id'>): Promise<string> => {
   try {
-    const brideData = convertBrideForFirestore(bride as Bride);
     const docRef = await addDoc(collection(db, 'Brides'), brideData);
     return docRef.id;
   } catch (error) {
-    console.error("Error adding bride:", error);
+    console.error("❌ Error adding bride:", error);
     throw error;
   }
 };

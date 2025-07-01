@@ -1,3 +1,4 @@
+// Calendar.tsx
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { he } from 'date-fns/locale';
 import { getBrideById } from '@/services/brideService';
 import { useToast } from '@/components/ui/use-toast';
 import { Timestamp } from 'firebase/firestore';
+import { deletePastAppointments } from '@/services/appointmentService';
 
 interface AppointmentWithBride extends Appointment {
   brideName?: string;
@@ -47,31 +49,34 @@ const Calendar = () => {
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      // Get appointments for the current month
+
+      // שלב 1: טען את כל הפגישות הרלוונטיות
       const start = startOfMonth(currentDate);
-      const end = addDays(endOfMonth(currentDate), 1); // Add 1 day to include end of month
-      
+      const end = addDays(endOfMonth(currentDate), 1); // כולל סוף חודש
+
       const appointmentsData = await getAppointmentsByDate(start, end);
-      // Add bride names to appointments
+
+      // שלב 2: העשר עם שמות הכלות
       const appointmentsWithBrides: AppointmentWithBride[] = [];
 
       for (const appointment of appointmentsData) {
         try {
           const bride = await getBrideById(appointment.brideId);
-
           appointmentsWithBrides.push({
             ...appointment,
             brideName: bride?.fullName || 'כלה לא ידועה'
           });
-        } catch (error) {
+        } catch {
           appointmentsWithBrides.push({
             ...appointment,
             brideName: 'כלה לא ידועה'
           });
         }
       }
-      
+
+      // שלב 3: שמור את כל הפגישות ביומן (כולל אלו שעברו!)
       setAppointments(appointmentsWithBrides);
+
     } catch (error) {
       console.error("Error loading appointments:", error);
       toast({
@@ -405,11 +410,15 @@ const Calendar = () => {
                     } else {
                       appointmentDate = new Date();
                     }
-                    
+
+                    const isPast = appointmentDate < new Date();
+
                     return (
                       <div 
                         key={appointment.id} 
-                        className="p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                          isPast ? 'bg-gray-100 opacity-50' : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
                         onClick={() => handleViewAppointmentDetails(appointment)}
                       >
                         <div className="flex items-center justify-between mb-2">
@@ -426,7 +435,7 @@ const Calendar = () => {
                               size="icon" 
                               className="h-6 w-6" 
                               onClick={(e) => {
-                                e.stopPropagation(); // Prevent triggering the parent onClick
+                                e.stopPropagation(); 
                                 handleEditAppointment(appointment);
                               }}
                             >
@@ -447,6 +456,9 @@ const Calendar = () => {
                           ) : appointment.notes ? (
                             <p className="text-xs bg-gray-100 p-2 rounded mt-1">{appointment.notes}</p>
                           ) : null}
+                          {isPast && (
+                            <p className="text-xs text-red-600 font-medium mt-1">פגישה שעברה</p>
+                          )}
                         </div>
                       </div>
                     );
@@ -478,6 +490,8 @@ const Calendar = () => {
         </div>
       )}
 
+      {/* Footer */}
+
       {/* Add Appointment Dialog */}
       <AddAppointmentDialog
         open={addDialogOpen}
@@ -500,6 +514,7 @@ const Calendar = () => {
         onOpenChange={setDetailsDialogOpen}
         appointment={selectedAppointment}
         onEdit={handleEditAppointment}
+        onDelete={loadAppointments}
       />
     </div>
   );

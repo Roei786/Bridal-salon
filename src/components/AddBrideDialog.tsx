@@ -1,3 +1,4 @@
+// AddBrideDialog.tsx
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,14 +20,13 @@ import {
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { addBride } from '@/services/brideService';
-import { Bride } from '@/services/brideService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { getActiveWorkers, Worker, addWorkerIfNotExists } from '@/services/workerService';
-
-
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/firebase';
+import { Bride, addBride } from '@/services/brideService';
 
 interface AddBrideDialogProps {
   open: boolean;
@@ -104,7 +104,32 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
       if (formData.assignedSeamstress) {
         await addWorkerIfNotExists(formData.assignedSeamstress);
       }
-      await addBride(formData);
+
+      const brideId = await addBride(formData);
+
+      const now = new Date();
+
+      await setDoc(doc(db, `Brides/${brideId}/appointments/placeholder`), {
+        createdAt: now,
+      });
+
+      await setDoc(doc(db, `Brides/${brideId}/measurements/initial`), {
+        bust: '',
+        waist: '',
+        hips: '',
+        height: '',
+        notes: '',
+        createdAt: now,
+      });
+
+      await setDoc(doc(db, `Brides/${brideId}/preparationForm/form`), {
+        makeup: '',
+        hair: '',
+        dressReady: false,
+        notes: '',
+        createdAt: now,
+      });
+
       toast({
         title: 'כלה נוספה בהצלחה',
         description: `${formData.fullName} נוספה למערכת`,
@@ -112,7 +137,7 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
 
       onBrideAdded();
       onOpenChange(false);
-      // Reset form
+
       setFormData({
         fullName: '',
         email: '',
@@ -123,10 +148,11 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
         paymentStatus: false,
         assignedSeamstress: '',
         beforeImages: [],
-        afterImages: []
+        afterImages: [],
       });
+
     } catch (error) {
-      console.error('Failed to add bride:', error);
+      console.error('❌ Failed to add bride:', error);
       toast({
         title: 'שגיאה בהוספת כלה',
         description: 'אירעה שגיאה בעת הניסיון להוסיף כלה חדשה',
@@ -293,3 +319,5 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
 };
 
 export default AddBrideDialog;
+
+

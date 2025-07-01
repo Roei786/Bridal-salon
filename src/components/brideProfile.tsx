@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, getDocs, collection, Firestore} from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Upload, Mail, MessageCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import emailjs from 'emailjs-com';
+import { format } from 'date-fns';
 
 
 const BrideProfile = () => {
@@ -29,9 +30,88 @@ const BrideProfile = () => {
     fetchBride();
   }, [id]);
 
-  const handleSendReminder = () => {
-    toast({ title: 'נשלחה תזכורת', description: 'הודעה נשלחה לתורים הקיימים' });
+const handleSendReminder = async () => {
+  if (!id || !bride?.fullName || !bride?.phoneNumber) {
+    toast({
+      title: 'שגיאה',
+      description: 'פרטי הכלה אינם שלמים (שם או מספר טלפון חסרים)',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+try {
+  // שליפת תורים מה-subcollection
+  const snapshot = await getDocs(collection(db, `Brides/${id}/appointments`));
+  const now = new Date();
+
+  // בניית מערך תורים עתידיים, כולל המרה מיידית ל- Date
+  const upcomingAppointments = snapshot.docs
+    .map((doc) => {
+      const data = doc.data() as { date: any; type?: string };
+
+      let appDate: Date;
+      if (data.date instanceof Date) {
+        appDate = data.date;
+      } else if (data.date?.toDate) {
+        appDate = data.date.toDate();
+      } else {
+        appDate = new Date(data.date);
+      }
+
+      return {
+        type: data.type ?? 'לא צויין סוג',
+        date: appDate,
+      };
+    })
+    .filter((app) => app.date > now)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  if (upcomingAppointments.length === 0) {
+    toast({
+      title: 'אין תורים קרובים',
+      description: 'לא נמצאו תורים עתידיים עבור הכלה',
+    });
+    return;
+  }
+
+  // בניית הודעת תזכורת
+  const messageArray = upcomingAppointments.map((app, index) => {
+    const dateStr = format(app.date, 'dd/MM/yyyy HH:mm');
+    return `${index + 1}. ${app.type} - ${dateStr}`;
+  });
+
+  const appointmentsText = messageArray.join('\n');
+
+  const templateParams = {
+    to_name: bride.fullName,
+    to_email: bride.email,
+    appointments: appointmentsText,  // במקום מערך, רק טקסט רגיל
+    salon_logo: 'https://i.ibb.co/d0mL1RVq/logo.png'
   };
+
+    // שליחה דרך EmailJS (SMS)
+    await emailjs.send(
+      'service_idzn0fs',     // 🔁 service ID שלך
+      'template_m8sytlg',    // 🔁 template ID שלך (SMS)
+      templateParams,
+      '0fzSnZp44MnYc6afv'    // 🔁 public key שלך
+    );
+
+    toast({
+      title: 'תזכורת נשלחה',
+      description: 'הודעת תזכורת נשלחה לכלה עם פרטי התורים 💬',
+    });
+
+  } catch (error) {
+    console.error('Reminder error:', error);
+    toast({
+      title: 'שגיאה בשליחה',
+      description: 'שליחת התזכורת נכשלה',
+      variant: 'destructive',
+    });
+  }
+};
 
 const handleSendMeasurementsForm = async () => {
   if (!bride?.email || !bride?.fullName || !id) {
@@ -46,7 +126,7 @@ const formUrl = `https://bridal-salon.web.app/measurements/${id}/form`;
     to_name: bride.fullName,
     to_email: bride.email,
     link: formUrl,
-    salon_logo: 'https://i.ibb.co/d0mL1RVq/logo.png',
+    salon_logo: 'https://i.ibb.co/d0mL1RVq/logo.png'
   };
 
   try {
@@ -131,7 +211,7 @@ const formUrl = `https://bridal-salon.web.app/measurements/${id}/form`;
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <Button onClick={handleSendReminder} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <MessageCircle className="h-4 w-4 mr-1" />
+              <Mail className="h-4 w-4 mr-1" />
               שליחת תזכורת לתורים
             </Button>
             <Button onClick={handleSendMeasurementsForm} className="bg-green-600 hover:bg-green-700 text-white">

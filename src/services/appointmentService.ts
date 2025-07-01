@@ -1,4 +1,5 @@
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, Timestamp, orderBy } from 'firebase/firestore';
+// appointmentService.ts
+import { collection, collectionGroup, addDoc, getDocs, doc,setDoc, getDoc, updateDoc, deleteDoc, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import { db } from '../firebase.ts';
 
 export interface Appointment {
@@ -153,13 +154,28 @@ export const getAppointmentById = async (id: string): Promise<Appointment | null
   }
 };
 
-// Add a new appointment
 export const addAppointment = async (appointment: Omit<Appointment, 'id'>): Promise<string> => {
   try {
-    const appointmentData = convertAppointmentForFirestore(appointment as Appointment);
-    const docRef = await addDoc(collection(db, 'Appointments'), appointmentData);
+    const appointmentDate = convertToDate(appointment.date);
+    const now = new Date();
 
-    return docRef.id;
+    if (appointmentDate < now) {
+      throw new Error("לא ניתן להוסיף תור בתאריך שכבר עבר");
+    }
+
+    const appointmentData = convertAppointmentForFirestore(appointment as Appointment);
+
+    // יצירת מזהה חדש
+    const newDocRef = doc(collection(db, 'Appointments'));
+
+    // שמירה בקולקשן הראשי
+    await setDoc(newDocRef, appointmentData);
+
+    // שמירה בתת־קולקשן
+    const brideAppointmentRef = doc(db, `Brides/${appointment.brideId}/appointments/${newDocRef.id}`);
+    await setDoc(brideAppointmentRef, appointmentData);
+
+    return newDocRef.id;
   } catch (error) {
     console.error("Error adding appointment:", error);
     throw error;
@@ -195,11 +211,45 @@ export const updateAppointment = async (id: string, appointmentData: Partial<App
 };
 
 // Delete an appointment
-export const deleteAppointment = async (id: string): Promise<void> => {
+export const deleteAppointment = async (id: string, brideId: string): Promise<void> => {
   try {
+    // נסי למחוק מהקולקשן הראשי
     await deleteDoc(doc(db, 'Appointments', id));
-  } catch (error) {
-    console.error(`Error deleting appointment with ID ${id}:`, error);
-    throw error;
+
+    // נסי למחוק מהתת־קולקשן של הכלה
+    await deleteDoc(doc(db, `Brides/${brideId}/appointments/${id}`));
+  } catch (error: any) {
+    console.error("❌ Error deleting appointment:", error);
+    throw new Error("מחיקה נכשלה: " + (error?.message || error));
   }
 };
+
+export const deletePastAppointments = async () => {
+  try {
+    const now = new Date();
+    const snapshot = await getDocs(collection(db, 'Appointments'));
+
+    for (const docSnap of snapshot.docs) {
+      const appointment = convertAppointmentFromFirestore(docSnap);
+      const appointmentDate = convertToDate(appointment.date);
+
+      // בדיקה אם התור בזמן עבר
+      if (appointmentDate < now) {
+        // מחיקת התור מהקולקשן הראשי
+        await deleteDoc(doc(db, 'Appointments', appointment.id!));
+
+        // מחיקת התור מתת-קולקשן הכלה (אם קיים)
+        await deleteDoc(doc(db, `Brides/${appointment.brideId}/appointments/${appointment.id}`));
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error deleting past appointments:", error);
+  }
+};
+
+export function convertToDate(date: string | Date | Timestamp): Date {
+  if (date instanceof Date) return date;
+  if (typeof date === 'string') return new Date(date);
+  if (date instanceof Timestamp) return date.toDate();
+  return new Date(); // fallback במקרה שהקלט לא צפוי
+}
