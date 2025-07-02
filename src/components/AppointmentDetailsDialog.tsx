@@ -67,19 +67,20 @@ const AppointmentDetailsDialog: React.FC<AppointmentDetailsDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle>פרטי תור</DialogTitle>
-            <Badge className={
-              appointment.status === 'מאושר' ? 'bg-green-100 text-green-800' : 
-              appointment.status === 'בוטל' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-            }>
-              {appointment.status}
-            </Badge>
-          </div>
           <DialogDescription>
             כל הפרטים של התור המבוקש
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex justify-between items-center">
+          <DialogTitle>פרטי תור</DialogTitle>
+          <Badge className={
+            appointment.status === 'מאושר' ? 'bg-green-100 text-green-800' : 
+            appointment.status === 'בוטל' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+          }>
+            {appointment.status}
+          </Badge>
+         </div>
 
         <div className="space-y-4 py-4">
           {/* Bride Info */}
