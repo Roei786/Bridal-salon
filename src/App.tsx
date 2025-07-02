@@ -14,7 +14,7 @@ import { checkAndSendReminders } from "./services/reminderService";
 import AppSidebar from "./components/AppSidebar";
 import Dashboard from "./components/Dashboard";
 import Brides from "./components/Brides";
-import BrideProfile from "./components/BrideProfile";
+import BrideProfile from "./components/brideProfile";
 import Calendar from "./components/Calendar";
 import ReportsPage from "./components/forms";
 import WeddingsStatsPage from "./components/data";

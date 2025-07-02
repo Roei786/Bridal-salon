@@ -1,4 +1,5 @@
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, orderBy, Timestamp, DocumentData } from 'firebase/firestore';
+// brideService.ts
+import { collection, addDoc, getDocs, doc,setDoc, getDoc, updateDoc, deleteDoc, query, where, orderBy, Timestamp, DocumentData } from 'firebase/firestore';
 import { db } from '../firebase.ts';
 
 export interface Bride {
