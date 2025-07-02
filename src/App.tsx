@@ -1,29 +1,42 @@
+// App.tsx
+import { useEffect, useRef } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import RegisterPage from './pages/RegisterPage';
+
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { checkAndSendReminders } from "./services/reminderService";
 
 import AppSidebar from "./components/AppSidebar";
 import Dashboard from "./components/Dashboard";
 import Brides from "./components/Brides";
+import BrideProfile from "./components/BrideProfile";
 import Calendar from "./components/Calendar";
-import Login from "./components/Login";
-import NotFound from "./pages/NotFound";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import ReportsPage from './components/forms';
-import WeddingsStatsPage from './components/data';
-import BrideProfile from "./components/brideProfile";
+import ReportsPage from "./components/forms";
+import WeddingsStatsPage from "./components/data";
+import EmployeeHoursPage from "./components/EmployeeHoursPage";
+import UserAreaComponent from "./components/UserArea";
 import PublicMeasurementForm from "./components/PublicMeasurementForm";
-import EmployeeHoursPage from './components/EmployeeHoursPage.tsx';
-import UserAreaComponent from './components/UserArea'; // 👈 Import the component
+import Login from "./components/Login";
+import RegisterPage from "./pages/RegisterPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoutes = () => {
   const { currentUser } = useAuth();
+  const hasRemindedRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasRemindedRef.current) {
+      checkAndSendReminders();
+      hasRemindedRef.current = true;
+    }
+  }, []);
 
   if (!currentUser) return <Navigate to="/login" />;
 
