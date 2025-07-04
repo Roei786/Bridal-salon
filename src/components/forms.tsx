@@ -33,7 +33,7 @@ const ReportsPage = () => {
             className="bg-white p-6 rounded shadow flex items-center justify-between hover:bg-amber-50 transition"
           >
             <span className="text-gray-800 font-medium">{report.name}</span>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <a
                 href={`/docs/${report.file}`}
                 download

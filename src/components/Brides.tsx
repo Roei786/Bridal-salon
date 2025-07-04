@@ -96,7 +96,7 @@ const Brides = () => {
           </h1>
           <p className="text-gray-700 text-base mt-1">רשימת כל הכלות והסטטוס שלהן</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end sm:justify-start w-full sm:w-auto">
           <Button variant={viewType === 'cards' ? 'default' : 'outline'} onClick={() => setViewType('cards')}>
             <LayoutGrid className="h-4 w-4 ml-1" />
             כרטיסיות
@@ -182,8 +182,8 @@ const Brides = () => {
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full table-auto border-collapse text-base">
+          <div className="overflow-x-auto rounded-lg border shadow-sm">
+            <table className="min-w-[700px] w-full table-auto border-collapse text-base">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
                   <th className="p-3 text-right">שם</th>
