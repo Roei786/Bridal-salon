@@ -182,7 +182,7 @@ const Brides = () => {
             ))}
           </div>
         ) : (
-          <div className="w-full overflow-x-auto rounded-lg border flex justify-end" dir="rtl">
+          <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-start" dir="rtl">
             <table className="w-full min-w-[600px] table-auto text-right border-collapse" dir="rtl">
               <thead className="bg-gray-50">
                 <tr>
@@ -204,7 +204,7 @@ const Brides = () => {
                     <td className="p-3">{bride.assignedSeamstress || '-'}</td>
                     <td className="p-3"><StatusBadge status={bride.historyStatus} /></td>
                     <td className="p-3"><PaymentBadge paid={bride.paymentStatus} /></td>
-                    <td className="p-3 space-x-2 space-x-reverse">
+                    <td className="p-3 flex flex-wrap gap-2 justify-end">
                       <Button className="bg-green-600 hover:bg-green-700 text-white" size="sm" onClick={() => handleEditBride(bride)}>ערוך</Button>
                       <Button variant="outline" size="sm" onClick={() => handleViewMeasurements(bride)}>מידות</Button>
                       <Button variant="secondary" size="sm" onClick={() => handleViewBride(bride)}>הצג</Button>

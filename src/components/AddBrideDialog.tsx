@@ -165,7 +165,7 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>הוספת כלה חדשה</DialogTitle>
           <DialogDescription>
@@ -297,7 +297,7 @@ const AddBrideDialog: React.FC<AddBrideDialogProps> = ({
             </div>
           </div>
 
-          <DialogFooter className="flex justify-between">
+          <DialogFooter className="flex justify-between bg-white sticky bottom-0 py-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               ביטול
             </Button>

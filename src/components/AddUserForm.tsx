@@ -69,7 +69,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ isOpen, onClose, onUserAdded 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>הוספת עובד/ת חדש/ה</DialogTitle>
           <DialogDescription>
