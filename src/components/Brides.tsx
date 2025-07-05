@@ -182,9 +182,9 @@ const Brides = () => {
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border shadow-sm">
-            <table className="min-w-[700px] w-full table-auto border-collapse text-base">
-              <thead className="bg-gray-100 text-gray-700">
+          <div className="w-full overflow-x-auto rounded-lg border flex justify-end" dir="rtl">
+            <table className="w-full min-w-[600px] table-auto text-right border-collapse" dir="rtl">
+              <thead className="bg-gray-50">
                 <tr>
                   <th className="p-3 text-right">שם</th>
                   <th className="p-3 text-right">טלפון</th>

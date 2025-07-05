@@ -199,7 +199,7 @@ const WeddingsStatsPage = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg h-[500px] w-full">
+          <div className="bg-white p-6 rounded-xl shadow-lg h-[500px] w-full" dir="rtl">
             <Bar data={barChartData} options={barChartOptions} />
           </div>
           

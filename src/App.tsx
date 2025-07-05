@@ -42,7 +42,7 @@ const ProtectedRoutes = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-gray-50 w-full flex">
+      <div className="min-h-screen bg-gray-50 w-full flex" dir="rtl">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <header className="flex h-16 shrink-0 items-center gap-2 px-4 border-b border-amber-200 bg-white">
