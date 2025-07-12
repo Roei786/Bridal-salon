@@ -1,4 +1,4 @@
-// קובץ: AppSidebar.tsx - גרסה עם פונטים מוגדלים ואלמנטים תחת SidebarFooter
+// קובץ: AppSidebar.tsx - גרסה עם תיקון לוגיקת שעון הנוכחות
 
 import React, { useEffect, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
@@ -27,7 +27,7 @@ const AppSidebar = () => {
   const [isProcessingClockAction, setIsProcessingClockAction] = useState(false);
 
   const getNavItems = () => {
-    const base = [
+    const baseItems = [
       { to: '/', label: 'לוח מחוונים', icon: LayoutDashboard },
       { to: '/brides', label: 'ניהול כלות', icon: Crown },
       { to: '/calendar', label: 'לוח זמנים', icon: Calendar },
@@ -35,31 +35,52 @@ const AppSidebar = () => {
       { to: '/data', label: 'נתונים', icon: FileText },
     ];
     if (userData?.role === 'manager') {
-      base.push({ to: '/employee-hours', label: 'ניהול עובדים', icon: Briefcase });
+      baseItems.push({ to: '/employee-hours', label: 'ניהול עובדים', icon: Briefcase });
     }
-    return base;
+    return baseItems;
   };
+
+  const navItems = getNavItems();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // --- ה-useEffect המתוקן והמלא ---
   useEffect(() => {
-    const fetchShift = async () => {
-      if (!currentUser) return;
+    const checkActiveShift = async () => {
+      // 1. אם אין משתמש, אפס הכל וחזור
+      if (!currentUser) {
+        setIsClockedIn(false);
+        setShiftStartTime(null);
+        setActiveShiftId(null);
+        return;
+      }
       try {
         const shift = await getActiveShift(currentUser.uid);
+        
+        // 2. אם נמצאה משמרת פעילה
         if (shift) {
           setIsClockedIn(true);
+          // 3. התיקון המרכזי: הסרת .toDate()
           setShiftStartTime(shift.clockInTime);
           setActiveShiftId(shift.id);
+        } else {
+          // 4. אם לא נמצאה משמרת פעילה, אפס הכל
+          setIsClockedIn(false);
+          setShiftStartTime(null);
+          setActiveShiftId(null);
         }
       } catch (e) {
         console.error('Shift error:', e);
+        // 5. במקרה של שגיאה, אפס הכל
+        setIsClockedIn(false);
+        setShiftStartTime(null);
+        setActiveShiftId(null);
       }
     };
-    fetchShift();
+    checkActiveShift();
   }, [currentUser]);
 
   const handleClockIn = async () => {
@@ -70,26 +91,41 @@ const AppSidebar = () => {
       setActiveShiftId(id);
       setIsClockedIn(true);
       setShiftStartTime(new Date());
+    } catch(e) {
+        console.error('Error clocking in:', e);
     } finally {
       setIsProcessingClockAction(false);
     }
   };
 
-  const handleClockOut = async () => {
-    if (!activeShiftId || !shiftStartTime) return;
-    setIsProcessingClockAction(true);
-    try {
-      await clockOut(activeShiftId, shiftStartTime);
-      setIsClockedIn(false);
-      setShiftStartTime(null);
-      setActiveShiftId(null);
-    } finally {
-      setIsProcessingClockAction(false);
-    }
-  };
+  // AppSidebar.tsx -> החלף את הפונקציה הקיימת בזו
+const handleClockOut = async () => {
+  console.log('--- ניסיון לבצע יציאה ---');
+  console.log('מנסה לצאת עם מזהה משמרת (activeShiftId):', activeShiftId);
+  console.log('משתמש בזמן כניסה (shiftStartTime):', shiftStartTime);
 
-  const navItems = getNavItems();
+  if (!activeShiftId || !shiftStartTime) {
+    console.error('היציאה נכשלה: מזהה משמרת או זמן כניסה חסרים.');
+    alert('שגיאה: לא ניתן לבצע יציאה. נסה לרענן את הדף.');
+    return;
+  }
 
+  setIsProcessingClockAction(true);
+  try {
+    await clockOut(activeShiftId, shiftStartTime);
+    console.log('היציאה בוצעה בהצלחה בצד הלקוח, מאפס את המצב.');
+    // איפוס המצב המקומי
+    setIsClockedIn(false);
+    setShiftStartTime(null);
+    setActiveShiftId(null);
+  } catch (e) {
+    console.error('שגיאה מהשירות בעת ניסיון יציאה:', e);
+    alert('אירעה שגיאה בעת ניסיון היציאה. בדוק את הקונסול.');
+  } finally {
+    setIsProcessingClockAction(false);
+  }
+};
+  
   return (
     <Sidebar side="right" className="w-[270px] border-l border-amber-200 bg-white">
       <SidebarHeader className="p-6 border-b border-amber-200">
@@ -100,12 +136,11 @@ const AppSidebar = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">הודיה</h1>
             <p className="text-base text-amber-700">סלון כלות חברתי</p>
-            <p className="text-sm text-gray-400 mt-1"></p>
           </div>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 360px)' }}>
+      <SidebarContent className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2 my-4 px-4">
@@ -120,7 +155,7 @@ const AppSidebar = () => {
                             ? 'bg-amber-100 text-amber-900 font-semibold shadow-inner'
                             : 'text-gray-600 hover:bg-amber-50 hover:text-gray-900'
                         }`
-                    }
+                      }
                     >
                       <item.icon className="h-6 w-6 flex-shrink-0" />
                       <span className="truncate text-lg">{item.label}</span>
@@ -134,7 +169,6 @@ const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-amber-200 space-y-4">
-        {/* שעון נוכחות */}
         {currentUser && (
           <Card className="bg-amber-50/50 border-amber-200">
             <CardHeader className="pb-2 pt-2.5 px-3">
@@ -168,17 +202,6 @@ const AppSidebar = () => {
           </Card>
         )}
 
-        {/* תמונת כלה */}
-        <div className="text-center">
-          <img
-            src="/bride-avatar.jpg"
-            alt="תמונת כלה"
-            className="w-20 h-20 rounded-full object-cover mx-auto shadow-lg border-2 border-amber-100"
-          />
-          <p className="text-sm text-amber-700 mt-2">תמונה מתוך הסלון</p>
-        </div>
-
-        {/* פרטי משתמש וכפתור יציאה */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
             <Users className="h-5 w-5 text-amber-600" />
@@ -201,4 +224,3 @@ const AppSidebar = () => {
 };
 
 export default AppSidebar;
-

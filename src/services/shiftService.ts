@@ -11,9 +11,12 @@ import {
     where,
     serverTimestamp,
     Timestamp,
-    orderBy
+    orderBy,
+    writeBatch,
+    deleteDoc
 } from 'firebase/firestore';
 import { Shift } from '../types';
+import { User } from '../types';
 
 const shiftsCollectionRef = collection(db, 'shifts');
 
@@ -32,7 +35,29 @@ export const clockIn = async (userId: string, userName?: string): Promise<string
 };
 
 export const clockOut = async (shiftId: string, clockInTime: Date): Promise<void> => {
-    // ... לוגיקה זהה ...
+  // ודא שהפרמטרים תקינים
+  if (!shiftId || !clockInTime) {
+    throw new Error("Shift ID and Clock-in time are required.");
+  }
+
+  const shiftDocRef = doc(db, 'shifts', shiftId);
+  const clockOutTime = new Date();
+
+  // חישוב משך המשמרת בשעות
+  const durationMilliseconds = clockOutTime.getTime() - clockInTime.getTime();
+  const durationHours = parseFloat((durationMilliseconds / (1000 * 60 * 60)).toFixed(2));
+  
+  // בדיקה למקרה שהחישוב נכשל
+  if (isNaN(durationHours)) {
+    console.error("Failed to calculate shift duration. Invalid clockInTime:", clockInTime);
+    throw new Error("Could not calculate shift duration.");
+  }
+
+  // עדכון המסמך ב-Firestore
+  await updateDoc(shiftDocRef, {
+    clockOutTime: Timestamp.fromDate(clockOutTime),
+    durationHours: durationHours,
+  });
 };
 
 
@@ -96,10 +121,55 @@ export const getShiftsForUserByMonth = async (userId: string, year: number, mont
 };
 
 
-export const getAllUsers = async () => {
-    const usersCollectionRef = collection(db, 'users'); // ודא ששם האוסף הוא 'users'
+export const getAllUsers = async (): Promise<User[]> => {
+    const usersCollectionRef = collection(db, 'users');
     const usersSnapshot = await getDocs(usersCollectionRef);
     
-    // --- ודא שמילת המפתח 'return' נמצאת כאן ---
-    return usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return usersSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    } as User));
+};
+export const setSingleManager = async (newManagerId: string) => {
+  const usersRef = collection(db, "users");
+  const batch = writeBatch(db);
+
+  // 1. מצא את המנהל הנוכחי
+  const managerQuery = query(usersRef, where("role", "==", "manager"));
+  const currentManagerSnapshot = await getDocs(managerQuery);
+
+  // 2. אם קיים מנהל, הוסף לפעולת האצווה את הורדתו לתפקיד עובד
+  if (!currentManagerSnapshot.empty) {
+    const oldManagerDoc = currentManagerSnapshot.docs[0];
+    batch.update(oldManagerDoc.ref, { role: "employee" });
+  }
+
+  // 3. הוסף לפעולת האצווה את קידום העובד הנבחר לתפקיד מנהל
+  const newManagerRef = doc(db, "users", newManagerId);
+  batch.update(newManagerRef, { role: "manager" });
+
+  // 4. בצע את כל הפעולות יחד
+  await batch.commit();
+};
+export const softDeleteUser = async (userId: string): Promise<void> => {
+  if (!userId) {
+    throw new Error("User ID is required for deletion.");
+  }
+  
+  // שלב 1: מחק את מסמך המשתמש מהקולקציה 'users'
+  const userDocRef = doc(db, "users", userId);
+  await deleteDoc(userDocRef);
+
+  // שלב 2 (בונוס, אבל מומלץ): מחק את כל המשמרות המשויכות למשתמש
+  // זה שומר על בסיס הנתונים נקי
+  const shiftsQuery = query(collection(db, 'shifts'), where('userId', '==', userId));
+  const shiftsSnapshot = await getDocs(shiftsQuery);
+
+  if (!shiftsSnapshot.empty) {
+    const batch = writeBatch(db);
+    shiftsSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  }
 };
