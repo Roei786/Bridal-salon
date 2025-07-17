@@ -12,10 +12,8 @@ export const checkAndSendReminders = async () => {
   const weekFromNow = new Date();
   weekFromNow.setDate(now.getDate() + 7);
 
-  console.log("🚀 Starting checkAndSendReminders...");
 
   const appointments = await getAppointments();
-  console.log(`📋 Found ${appointments.length} total appointments.`);
 
   const sentTo = new Set();
 
@@ -25,20 +23,16 @@ export const checkAndSendReminders = async () => {
     return (diffInDays >= 0 && diffInDays < 2) || (diffInDays >= 5 && diffInDays < 9);
   });
 
-  console.log(`📅 ${upcoming.length} appointments are in the target range (1 or 7 days ahead).`);
 
   for (const app of upcoming) {
-    console.log(`➡️ Processing appointment for brideId: ${app.brideId}`);
 
     if (sentTo.has(app.brideId)) {
-      console.log(`⏩ Skipping duplicate brideId: ${app.brideId}`);
       continue;
     }
     sentTo.add(app.brideId);
 
     const bride = await getBrideById(app.brideId);
     if (!bride) {
-      console.log(`❌ Bride not found for id: ${app.brideId}`);
       continue;
     }
 
@@ -51,14 +45,12 @@ export const checkAndSendReminders = async () => {
       const last = convertToDate(brideData.lastReminderSent);
       const sameDay = last.toDateString() === now.toDateString();
       if (sameDay) {
-        console.log(`⏭️ Skipping ${bride.fullName}, already reminded today.`);
         continue;
       }
     }
 
     try {
       const snapshot = await getDocs(collection(db, `Brides/${app.brideId}/appointments`));
-      console.log(`📁 Loaded ${snapshot.docs.length} appointments for ${bride.fullName}`);
 
       const upcomingAppointments = snapshot.docs
         .map((doc) => {
@@ -81,10 +73,8 @@ export const checkAndSendReminders = async () => {
         })
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      console.log(`🔍 ${upcomingAppointments.length} upcoming appointments found for ${bride.fullName}`);
 
       if (upcomingAppointments.length === 0) {
-        console.log(`🚫 No appointments in 1 or 7 days for ${bride.fullName}`);
         continue;
       }
 
@@ -109,19 +99,16 @@ export const checkAndSendReminders = async () => {
         '0fzSnZp44MnYc6afv'
       );
 
-      console.log(`✅ Reminder sent to ${bride.fullName}`);
 
       await updateDoc(brideDocRef, {
         lastReminderSent: Timestamp.fromDate(now),
       });
 
-      console.log(`📝 Updated lastReminderSent for ${bride.fullName}`);
     } catch (error) {
       console.error(`❌ Failed to process reminder for ${bride.fullName}:`, error);
     }
   }
 
-  console.log("🏁 Finished checkAndSendReminders.");
 };
 
 function convertToDate(value: string | Date | Timestamp): Date {

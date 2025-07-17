@@ -25,7 +25,7 @@ import { updateAppointment, Appointment } from '@/services/appointmentService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { Bride, getBrides } from '@/services/brideService';
-
+import { Timestamp } from 'firebase/firestore';
 interface EditAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -72,18 +72,39 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
   }, []);
 
   useEffect(() => {
-    // Update form data when appointment changes
-    if (appointment) {
-      const date = appointment.date instanceof Date ? appointment.date : new Date(appointment.date);
-      setFormData({
-        ...appointment,
-        date: date
-      });
-      
-      // Set the selected time based on the appointment date
-      setSelectedTime(`${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`);
+  // Update form data when appointment changes
+  if (appointment && appointment.date) {
+    let finalDate: Date;
+
+    // --- התיקון כאן: הוספנו לוגיקה לטיפול בכל סוגי התאריכים ---
+
+    // מקרה 1: הערך הוא כבר אובייקט Date של JavaScript
+    if (appointment.date instanceof Date) {
+      finalDate = appointment.date;
     }
-  }, [appointment]);
+    // מקרה 2: הערך הוא אובייקט Timestamp של Firebase
+    else if (
+      typeof appointment.date === 'object' &&
+      appointment.date !== null &&
+      'toDate' in appointment.date &&
+      typeof (appointment.date as Timestamp).toDate === 'function'
+    ) {
+      finalDate = (appointment.date as Timestamp).toDate();
+    }
+    // מקרה 3: הערך הוא מחרוזת טקסט או מספר
+    else {
+      finalDate = new Date(appointment.date as string | number);
+    }
+
+    setFormData({
+      ...appointment,
+      date: finalDate
+    });
+    
+    // Set the selected time based on the final converted date
+    setSelectedTime(`${String(finalDate.getHours()).padStart(2, '0')}:${String(finalDate.getMinutes()).padStart(2, '0')}`);
+  }
+}, [appointment]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {

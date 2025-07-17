@@ -1,7 +1,7 @@
 // File: src/services/workerService.ts
 import { db } from '@/firebase';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
-
+import { User } from '../types'; 
 export interface Worker {
   id?: string;
   fullName: string;
@@ -13,39 +13,19 @@ export interface Worker {
   mustChangePassword?: boolean;
 }
 
-// ✅ Get all active workers (from 'workers' collection)
-export const getActiveWorkers = async (): Promise<Worker[]> => {
-  try {
-    const workersQuery = query(
-      collection(db, 'workers'),
-      where('deleted', '==', false)
-    );
 
-    const querySnapshot = await getDocs(workersQuery);
+export const getActiveWorkers = async (): Promise<User[]> => {
 
-    const workers: Worker[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      workers.push({
-        id: doc.id,
-        fullName: data.fullName || '',
-        email: data.email || '',
-        role: data.role || 'employee',
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate(),
-        deleted: data.deleted || false,
-        mustChangePassword: data.mustChangePassword || false
-      });
-    });
-
-    return workers;
-  } catch (error) {
-    console.error('Error getting workers:', error);
-    throw error;
-  }
+  const q = query(collection(db, "users"), where("role", "==", "employee"));
+  
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as User)); 
 };
 
-// ✅ Add worker to 'workers' collection if not exists
+
 export const addWorkerIfNotExists = async (fullName: string) => {
   try {
     if (!fullName.trim()) return;

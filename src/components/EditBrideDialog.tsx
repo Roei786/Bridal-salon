@@ -1,21 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Button } from './ui/button';
-import { Bride, updateBride } from '@/services/brideService';
-import { addWorkerIfNotExists } from '@/services/workerService';
-import { getActiveWorkers } from '@/services/workerService';
+// src/components/EditBrideDialog.tsx
 
-// Define Worker type locally if not exported from '@/types'
-type Worker = {
-  name: string;
-};
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { Bride, updateBride } from '@/services/brideService';
 
 export interface EditBrideDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onBrideUpdated: () => Promise<void>;
+  onBrideUpdated: () => void;
   bride: Bride | null;
 }
 
@@ -25,95 +21,83 @@ const EditBrideDialog: React.FC<EditBrideDialogProps> = ({
   onBrideUpdated,
   bride
 }) => {
-  const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [assignedSeamstress, setAssignedSeamstress] = useState('');
-  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [formData, setFormData] = useState<Partial<Bride>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // אתחול הטופס עם נתוני הכלה כשהדיאלוג נפתח
     if (bride) {
-      setFullName(bride.fullName || '');
-      setPhoneNumber(bride.phoneNumber || '');
-      setEmail(bride.email || '');
-      setAssignedSeamstress(bride.assignedSeamstress || '');
+      setFormData({
+        fullName: bride.fullName || '',
+        phoneNumber: bride.phoneNumber || '',
+        email: bride.email || '',
+        assignedSeamstress: bride.assignedSeamstress || '',
+      });
     }
   }, [bride]);
 
-  useEffect(() => {
-    const fetchWorkers = async () => {
-      try {
-        const workersList = await getWorkers();
-        setWorkers(workersList);
-      } catch (error) {
-        console.error('Failed to fetch workers:', error);
-      }
-    };
-    fetchWorkers();
-  }, []);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!bride) return;
-
-    const updatedBride: Bride = {
-      ...bride,
-      fullName,
-      phoneNumber,
-      email,
-      assignedSeamstress
-    };
-
-    if (assignedSeamstress && !workers.some(w => w.name === assignedSeamstress)) {
-      await addWorker({ name: assignedSeamstress });
-    }
-
+    
+    setIsLoading(true);
     try {
-      await updateBride(updatedBride.id, updatedBride);
-      await onBrideUpdated();
-      onOpenChange(false);
+      // עדכון המסמך ב-Firestore רק עם השדות שהשתנו
+      await updateBride(bride.id, formData);
+      onBrideUpdated(); // רענון רשימת הכלות בעמוד הקודם
+      onOpenChange(false); // סגירת הדיאלוג
     } catch (error) {
       console.error('Error updating bride:', error);
+      alert('שגיאה בעדכון פרטי הכלה');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>עריכת פרטי כלה</DialogTitle>
+          <DialogTitle>עריכת פרטי כלה: {bride?.fullName}</DialogTitle>
+          <DialogDescription>
+            עדכן את פרטי הכלה ולחץ על שמירה בסיום.
+          </DialogDescription>
         </DialogHeader>
-
-        <div className="space-y-4">
+        
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
-            <Label>שם מלא</Label>
-            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            <Label htmlFor="fullName" className="text-right">שם מלא</Label>
+            <Input id="fullName" value={formData.fullName || ''} onChange={handleInputChange} />
           </div>
           <div>
-            <Label>מספר טלפון</Label>
-            <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+            <Label htmlFor="phoneNumber" className="text-right">מספר טלפון</Label>
+            <Input id="phoneNumber" value={formData.phoneNumber || ''} onChange={handleInputChange} />
           </div>
           <div>
-            <Label>אימייל</Label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Label htmlFor="email" className="text-right">אימייל</Label>
+            <Input id="email" type="email" value={formData.email || ''} onChange={handleInputChange} />
           </div>
+          
+          {/* --- החזרנו את שדה התופרת להיות שדה טקסט חופשי --- */}
           <div>
-            <Label>תופרת</Label>
+            <Label htmlFor="assignedSeamstress">שם התופרת</Label>
             <Input
-              list="seamstress-list"
-              value={assignedSeamstress}
-              onChange={(e) => setAssignedSeamstress(e.target.value)}
+              id="assignedSeamstress"
+              value={formData.assignedSeamstress || ''}
+              onChange={handleInputChange}
             />
-            <datalist id="seamstress-list">
-              {workers.map((worker) => (
-                <option key={worker.name} value={worker.name} />
-              ))}
-            </datalist>
           </div>
 
-          <Button onClick={handleSubmit} className="bg-green-600 text-white hover:bg-green-700">
-            שמור שינויים
+          <Button type="submit" disabled={isLoading} className="w-full bg-amber-500 text-white hover:bg-amber-600">
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading ? 'שומר...' : 'שמור שינויים'}
           </Button>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

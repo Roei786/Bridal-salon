@@ -18,7 +18,6 @@ import image2 from '@/assets/images/image2.jpeg';
 import image3 from '@/assets/images/image3.jpeg';
 import image4 from '@/assets/images/image7.jpeg';
 
-import logo from '/public/files/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -77,7 +76,7 @@ const Login = () => {
           <Card className="w-full bg-white/90 backdrop-blur-md border border-rose-100 shadow-2xl rounded-2xl">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 w-24 h-24 bg-pink-100 rounded-full flex items-center justify-center shadow">
-                <img src={logo} alt="לוגו" className="w-20 h-20 object-contain" />
+                <img src='/files/logo.png' alt="לוגו" className="w-20 h-20 object-contain" />
               </div>
               <CardTitle className="text-3xl font-bold text-rose-600">ברוכה הבאה להודיה</CardTitle>
               <CardDescription className="text-rose-500 mt-1">

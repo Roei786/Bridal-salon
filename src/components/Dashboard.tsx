@@ -28,15 +28,14 @@ import { format, startOfWeek, endOfWeek, isWithinInterval, addDays, differenceIn
 import { Timestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
-// Import your services
+
 import { getBrides, Bride } from '@/services/brideService';
 import { getAppointments, Appointment } from '@/services/appointmentService';
 import { getMeasurementsByBrideId, Measurement } from '@/services/measurementService';
 import { getActiveShift, clockIn, clockOut } from '@/services/shiftService';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Import the background image
-import background from '/public/files/background.jpg'
+
 
 
 interface FormattedAppointment {
@@ -351,7 +350,7 @@ const Dashboard = () => {
       <div
         className="text-center mb-8 p-10 rounded-lg shadow-xl"
         style={{
-          backgroundImage: `url(${background})`,
+          backgroundImage: `url('/files/background.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
